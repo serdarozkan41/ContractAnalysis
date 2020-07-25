@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,15 @@ import android.widget.Toast;
 
 import androidx.transition.Explode;
 
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -49,6 +59,7 @@ public class ResultFragment extends Fragment {
     }
 
     private void init() {
+        showProgressDialog(getResources().getString(R.string.loading));
         Bitmap bitmap = getBitmap();
         scannedImageView = view.findViewById(R.id.scannedImage);
         setScannedImage(bitmap);
@@ -67,6 +78,21 @@ public class ResultFragment extends Fragment {
         } else {
             pageNumber.setText( "1" );
         }
+/*
+        Result[] sonu7clar = detectBarCode(bitmap);
+        if (sonu7clar != null) {
+            Log.e("BULAMDIM: ", String.valueOf(sonu7clar.length));
+            for (Result res : sonu7clar)
+            {
+                Log.e("SONUC: ", res.getText());
+            }
+        }
+        else{
+            Log.e("BULAMDIM: ","");
+        }
+       */
+
+        dismissDialog();
     }
 
     private Bitmap getBitmap() {
@@ -86,6 +112,25 @@ public class ResultFragment extends Fragment {
             e.printStackTrace();
         }
         return null;
+    }
+
+    Result[] detectBarCode(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
+        bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+        LuminanceSource source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
+        //Reader reader = new QRCodeReader();
+        QRCodeMultiReader reader = new QRCodeMultiReader();
+
+        try {
+            Result[] result = reader.decodeMultiple(new BinaryBitmap(new HybridBinarizer(source)));
+            return result;
+
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private Uri getUri() {

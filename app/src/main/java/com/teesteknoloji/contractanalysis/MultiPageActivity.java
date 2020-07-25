@@ -14,8 +14,14 @@ import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -35,13 +41,25 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.multi.qrcode.QRCodeMultiReader;
 import com.teesteknoloji.contractanalysis.utils.FileIOUtils;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
+import com.teesteknoloji.contractanalysis.utils.FileWritingCallback;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MultiPageActivity extends AppCompatActivity {
@@ -206,10 +224,75 @@ public class MultiPageActivity extends AppCompatActivity {
                 ImageView imageView = eachFileView.findViewById(R.id.each_file_screenshot);
                 imageView.setImageBitmap(myBitmap);
 
-                TextView textView = eachFileView.findViewById(R.id.each_pageno);
-                textView.setText("Sayfa " + (stagingFiles.size() - position + 1));
+                String foundedQR= "";
+
+
+
+                int fromHere = (int) (myBitmap.getHeight() * 0.2);
+                final Bitmap croppedBitmap = ConvertGray(Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), fromHere));
+
+
+                Result[] sonu7clar = detectBarCode(croppedBitmap);
+                if (sonu7clar != null) {
+                    Log.e("BULAMDIM: ", String.valueOf(sonu7clar.length));
+                    for (Result res : sonu7clar)
+                    {
+                        String qr = res.getText();
+                        if (qr.length()==11){
+                            foundedQR=qr;
+                        }
+                    }
+                }
+                else{
+                    Log.e("BULAMDIM: ","");
+                }
+
+                if (foundedQR.length()>0)
+                {
+                    TextView textView = eachFileView.findViewById(R.id.each_pageno);
+                    textView.setText(foundedQR);
+                }
+                else{
+                    TextView textView = eachFileView.findViewById(R.id.each_pageno);
+                    textView.setText("Sayfa " + (stagingFiles.size() - position + 1));
+                }
+
 
                 return eachFileView;
+            }
+        }
+
+        private Bitmap ConvertGray(Bitmap bmpOriginal){
+            int width, height;
+            height = bmpOriginal.getHeight();
+            width = bmpOriginal.getWidth();
+
+            Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmpGrayscale);
+            Paint paint = new Paint();
+            ColorMatrix cm = new ColorMatrix();
+            cm.setSaturation(0);
+            ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+            paint.setColorFilter(f);
+            c.drawBitmap(bmpOriginal, 0, 0, paint);
+            return bmpGrayscale;
+        }
+
+        private Result[] detectBarCode(Bitmap bitmap) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
+            bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+            LuminanceSource source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
+            //Reader reader = new QRCodeReader();
+            QRCodeMultiReader reader = new QRCodeMultiReader();
+
+            try {
+                Result[] result = reader.decodeMultiple(new BinaryBitmap(new HybridBinarizer(source)));
+                return result;
+            } catch (NotFoundException e) {
+                e.printStackTrace();
+                return null;
             }
         }
     }
