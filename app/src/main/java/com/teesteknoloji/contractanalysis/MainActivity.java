@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.developer.kalert.KAlertDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.teesteknoloji.contractanalysis.persistance.DocumentViewModel;
@@ -63,10 +64,10 @@ public class MainActivity extends AppCompatActivity {
     private final Context c = this;
     private List<Uri> scannedBitmaps = new ArrayList<>();
 
-   // private DocumentViewModel viewModel;
+    // private DocumentViewModel viewModel;
     //private LinearLayout emptyLayout;
 
-  //  private String searchText = "";
+    //  private String searchText = "";
     LiveData<List<Document>> liveData;
 
     MaterialSpinner DbProducts;
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
     MaterialSpinner DbScanForms;
     EditText TbContractNumber;
     private List<String> ProductList;
+    private List<String> CampaingList;
+    private List<String> FormTypeList;
+    private List<String> ScanFormList;
 
     public MainActivity() {
 
@@ -87,19 +91,19 @@ public class MainActivity extends AppCompatActivity {
 
         PermissionUtil.ask(this);
 
-        final String baseStorageDirectory =  getApplicationContext().getString( R.string.base_storage_path);
-        FileIOUtils.mkdir( baseStorageDirectory );
+        final String baseStorageDirectory = getApplicationContext().getString(R.string.base_storage_path);
+        FileIOUtils.mkdir(baseStorageDirectory);
 
-        final String baseStagingDirectory =  getApplicationContext().getString( R.string.base_staging_path);
-        FileIOUtils.mkdir( baseStagingDirectory );
+        final String baseStagingDirectory = getApplicationContext().getString(R.string.base_staging_path);
+        FileIOUtils.mkdir(baseStagingDirectory);
 
-        final String scanningTmpDirectory =  getApplicationContext().getString( R.string.base_scantmp_path);
-        FileIOUtils.mkdir( scanningTmpDirectory );
+        final String scanningTmpDirectory = getApplicationContext().getString(R.string.base_scantmp_path);
+        FileIOUtils.mkdir(scanningTmpDirectory);
 
         InitComponents();
     }
 
-    private void InitComponents(){
+    private void InitComponents() {
         DbProducts = findViewById(R.id.DbProducts);
         DbCampaings = findViewById(R.id.DbCampaings);
         DbFormTypes = findViewById(R.id.DbFormTypes);
@@ -107,45 +111,70 @@ public class MainActivity extends AppCompatActivity {
         TbContractNumber = findViewById(R.id.TbContractNumber);
 
         ProductList = new ArrayList<>();
-        ProductList.add("Kampong Thom");
-        ProductList.add("Kampong Cham");
-        ProductList.add("Kampong Chhnang");
-        ProductList.add("Phnom Penh");
-        ProductList.add("Kandal");
-        ProductList.add("Kampot");
+        ProductList.add("CK BEDA SATIŞ");
+        ProductList.add("CK BEDA ABONELİK");
+
+        CampaingList = new ArrayList<>();
+        CampaingList.add("CK SATIŞ");
+
+        FormTypeList = new ArrayList<>();
+        FormTypeList.add("SİSTEM");
+        FormTypeList.add("MATBU");
+
+        ScanFormList = new ArrayList<>();
+        ScanFormList.add("Çerçeve Sözleşme");
+        ScanFormList.add("Sözleşme Formları");
+        ScanFormList.add("İlave Sayaç Formu");
+        ScanFormList.add("KVKK Formu");
+        ScanFormList.add("Güvence Bedeli Dilekçesi");
+        ScanFormList.add("Teminat Mektubu");
+        ScanFormList.add("Kimlik Bilgileri");
+        ScanFormList.add("Yetki Belgeleri");
+        ScanFormList.add("Faaliyet Belgeleri");
+        ScanFormList.add("Dask");
+        ScanFormList.add("Yapı Ruhsat Belgeleri");
+        ScanFormList.add("Sanayi Sicil Belgeleri");
+        ScanFormList.add("Diğer Belgeler");
+        ScanFormList.add("Personel İmzası");
+        ScanFormList.add("Müşteri İmzası");
+
 
         DbProducts.setItems(ProductList);
 
         DbProducts.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+            @Override
+            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
                 Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
             }
         });
 
-        DbCampaings.setItems(ProductList);
+        DbCampaings.setItems(CampaingList);
 
         DbCampaings.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+            @Override
+            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
                 Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
             }
         });
 
-        DbFormTypes.setItems(ProductList);
+        DbFormTypes.setItems(FormTypeList);
 
         DbFormTypes.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+            @Override
+            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
                 Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
             }
         });
 
-        DbScanForms.setItems(ProductList);
+        DbScanForms.setItems(ScanFormList);
 
         DbScanForms.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+            @Override
+            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
                 Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
             }
         });
@@ -157,33 +186,46 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void goToSearch(MenuItem mi){
+    public void goToSearch(MenuItem mi) {
         Intent intent = new Intent(this, SearchableActivity.class);
         startActivityForResult(intent, 0);
     }
 
 
-    public void goToPreferences(MenuItem mi){
+    public void goToPreferences(MenuItem mi) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivityForResult(intent, 0);
     }
 
-    public void openCamera(View v){
-        scannedBitmaps.clear();
+    public void openCamera(View v) {
 
-        String stagingDirPath = getApplicationContext().getString( R.string.base_staging_path );
-        String scanningTmpDirectory =  getApplicationContext().getString( R.string.base_scantmp_path);
-
-        FileIOUtils.clearDirectory( stagingDirPath );
-        FileIOUtils.clearDirectory( scanningTmpDirectory );
+        if (TbContractNumber.getText().length() > 0) {
 
 
-        Intent intent = new Intent(this, ScanActivity.class);
-        intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA);
+            scannedBitmaps.clear();
 
-        //startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE);
-        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
-        startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE, options.toBundle());
+            String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
+            String scanningTmpDirectory = getApplicationContext().getString(R.string.base_scantmp_path);
+
+            FileIOUtils.clearDirectory(stagingDirPath);
+            FileIOUtils.clearDirectory(scanningTmpDirectory);
+
+
+            Intent intent = new Intent(this, ScanActivity.class);
+            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA);
+
+            //startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+            startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE, options.toBundle());
+        } else {
+            KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.ERROR_TYPE);
+            pDialog.getProgressHelper().setBarColor(R.color.appRed);
+            pDialog.setTitleText("Uyarı");
+            pDialog.setContentText("Sözleşme Numarası.");
+            pDialog.setConfirmText("Tamam");
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
     }
 
 //    public void openGallery(View v){
@@ -197,97 +239,97 @@ public class MainActivity extends AppCompatActivity {
 //        startActivityForResult(intent, ScanConstants.PICKFILE_REQUEST_CODE);
 //    }
 
-    private void saveBitmap( final Bitmap bitmap, final boolean addMore ){
+    private void saveBitmap(final Bitmap bitmap, final boolean addMore) {
 
-        final String baseDirectory =  getApplicationContext().getString( addMore ? R.string.base_staging_path : R.string.base_storage_path);
-            final File sd = Environment.getExternalStorageDirectory();
+        final String baseDirectory = getApplicationContext().getString(addMore ? R.string.base_staging_path : R.string.base_storage_path);
+        final File sd = Environment.getExternalStorageDirectory();
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy_hh-mm-ss");
-            final String timestamp = simpleDateFormat.format( new Date() );
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy_hh-mm-ss");
+        final String timestamp = simpleDateFormat.format(new Date());
 
-            if( addMore ){
+        if (addMore) {
 
-                try {
+            try {
 
-                    String filename = "SCANNED_STG_" + timestamp + ".png";
+                String filename = "SCANNED_STG_" + timestamp + ".png";
 
-                    FileIOUtils.writeFile(baseDirectory, filename, new FileWritingCallback() {
-                        @Override
-                        public void write(FileOutputStream out) {
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                        }
-                    });
-
-                    bitmap.recycle();
-                    System.gc();
-
-                }catch(IOException ioe){
-                    ioe.printStackTrace();
-                }
-
-            } else {
-
-                DialogUtil.askUserFilaname( c, null, null, new DialogUtilCallback() {
-
+                FileIOUtils.writeFile(baseDirectory, filename, new FileWritingCallback() {
                     @Override
-                    public void onSave(String textValue, String category) {
-
-                        try {
-
-                            final PDFWriterUtil pdfWriter = new PDFWriterUtil();
-
-                            String stagingDirPath = getApplicationContext().getString( R.string.base_staging_path );
-
-                            List<File> stagingFiles = FileIOUtils.getAllFiles( stagingDirPath );
-                            for ( File stagedFile : stagingFiles ) {
-                                pdfWriter.addFile( stagedFile );
-                            }
-
-                            pdfWriter.addBitmap(bitmap);
-
-                            String filename = "SCANNED_" + timestamp + ".pdf";
-                            FileIOUtils.writeFile( baseDirectory, filename, new FileWritingCallback() {
-                                @Override
-                                public void write(FileOutputStream out) {
-                                    try {
-                                        pdfWriter.write(out);
-
-                                    }catch (IOException e){
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-
-
-                            fileAdapter.notifyDataSetChanged();
-
-                            FileIOUtils.clearDirectory( stagingDirPath );
-
-                            SimpleDateFormat simpleDateFormatView = new SimpleDateFormat("dd-MM-yyyy hh:mm");
-                            final String timestampView = simpleDateFormatView.format(new Date());
-
-                            Document newDocument = new Document();
-                            newDocument.setName( textValue );
-                            newDocument.setCategory( category );
-                            newDocument.setPath( filename );
-                            newDocument.setScanned( timestampView );
-                            newDocument.setPageCount( pdfWriter.getPageCount() );
-                            //viewModel.saveDocument(newDocument);
-
-                            pdfWriter.close();
-
-                            bitmap.recycle();
-                            System.gc();
-
-                        }catch(IOException ioe){
-                            ioe.printStackTrace();
-
-                        }
-
+                    public void write(FileOutputStream out) {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                     }
                 });
 
+                bitmap.recycle();
+                System.gc();
+
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
             }
+
+        } else {
+
+            DialogUtil.askUserFilaname(c, null, null, new DialogUtilCallback() {
+
+                @Override
+                public void onSave(String textValue, String category) {
+
+                    try {
+
+                        final PDFWriterUtil pdfWriter = new PDFWriterUtil();
+
+                        String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
+
+                        List<File> stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
+                        for (File stagedFile : stagingFiles) {
+                            pdfWriter.addFile(stagedFile);
+                        }
+
+                        pdfWriter.addBitmap(bitmap);
+
+                        String filename = "SCANNED_" + timestamp + ".pdf";
+                        FileIOUtils.writeFile(baseDirectory, filename, new FileWritingCallback() {
+                            @Override
+                            public void write(FileOutputStream out) {
+                                try {
+                                    pdfWriter.write(out);
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+
+                        fileAdapter.notifyDataSetChanged();
+
+                        FileIOUtils.clearDirectory(stagingDirPath);
+
+                        SimpleDateFormat simpleDateFormatView = new SimpleDateFormat("dd-MM-yyyy hh:mm");
+                        final String timestampView = simpleDateFormatView.format(new Date());
+
+                        Document newDocument = new Document();
+                        newDocument.setName(textValue);
+                        newDocument.setCategory(category);
+                        newDocument.setPath(filename);
+                        newDocument.setScanned(timestampView);
+                        newDocument.setPageCount(pdfWriter.getPageCount());
+                        //viewModel.saveDocument(newDocument);
+
+                        pdfWriter.close();
+
+                        bitmap.recycle();
+                        System.gc();
+
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+
+                    }
+
+                }
+            });
+
+        }
     }
 
     private void savePdf() {
@@ -299,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         final String timestamp = simpleDateFormat.format(new Date());
 
 
-        DialogUtil.askUserFilaname(c, null, null, new DialogUtilCallback() {
+        /*DialogUtil.askUserFilaname(c, null, null, new DialogUtilCallback() {
 
             @Override
             public void onSave(String textValue, String category) {
@@ -352,19 +394,19 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-        });
+        });*/
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if ( ( requestCode == ScanConstants.PICKFILE_REQUEST_CODE || requestCode == ScanConstants.START_CAMERA_REQUEST_CODE ) &&
+        if ((requestCode == ScanConstants.PICKFILE_REQUEST_CODE || requestCode == ScanConstants.START_CAMERA_REQUEST_CODE) &&
                 resultCode == Activity.RESULT_OK) {
 
 
-            boolean saveMode = data.getExtras().containsKey(ScanConstants.SAVE_PDF) ? data.getExtras().getBoolean( ScanConstants.SAVE_PDF ) : Boolean.FALSE;
-            if(saveMode){
+            boolean saveMode = data.getExtras().containsKey(ScanConstants.SAVE_PDF) ? data.getExtras().getBoolean(ScanConstants.SAVE_PDF) : Boolean.FALSE;
+            if (saveMode) {
                 savePdf();
 
             } else {

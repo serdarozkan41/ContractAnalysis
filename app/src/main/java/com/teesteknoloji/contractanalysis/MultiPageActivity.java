@@ -51,10 +51,10 @@ public class MultiPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multi_page);
 
-        setTitle( getResources().getString(R.string.multi_page_title) );
+        setTitle(getResources().getString(R.string.multi_page_title));
 
-        final String stagingDirPath =  getApplicationContext().getString( R.string.base_staging_path);
-        final List<File> stagingFiles = FileIOUtils.getAllFiles( stagingDirPath );
+        final String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
+        final List<File> stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
 
         final GridView pagesGridView = (GridView) findViewById(R.id.multi_page_grid);
         final BaseAdapter gvAdapter = new ImageAdapterGridView(this);
@@ -63,16 +63,16 @@ public class MultiPageActivity extends AppCompatActivity {
         pagesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                if(position == 0) scanMore(view);
+                if (position == 0) scanMore(view);
                 else showImage(stagingFiles, position, view);
             }
         });
 
 
-       setMargins(pagesGridView,20,20+getStatusBarHeight(),20,20);
+        setMargins(pagesGridView, 20, 20 + getStatusBarHeight(), 20, 20);
     }
 
-    private void setMargins (View view, int left, int top, int right, int bottom) {
+    private void setMargins(View view, int left, int top, int right, int bottom) {
         if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
             ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
             p.setMargins(left, top, right, bottom);
@@ -83,13 +83,11 @@ public class MultiPageActivity extends AppCompatActivity {
     private int getStatusBarHeight() {
         int height;
         Resources myResources = getResources();
-        int idStatusBarHeight = myResources.getIdentifier( "status_bar_height", "dimen", "android");
+        int idStatusBarHeight = myResources.getIdentifier("status_bar_height", "dimen", "android");
         if (idStatusBarHeight > 0) {
             height = getResources().getDimensionPixelSize(idStatusBarHeight);
-            Toast.makeText(this, "Status Bar Height = " + height, Toast.LENGTH_LONG).show();
         } else {
             height = 0;
-            Toast.makeText(this, "Resources NOT found", Toast.LENGTH_LONG).show();
         }
         return height;
     }
@@ -112,6 +110,7 @@ public class MultiPageActivity extends AppCompatActivity {
         out.putExtra(ScanConstants.SAVE_PDF, Boolean.TRUE);
         setResult(RESULT_OK, out);
         finish();
+        Toast.makeText(this, "Sunucuya Kaydedildi.", Toast.LENGTH_LONG).show();
     }
 
     public void scanMore(View view) {
@@ -127,10 +126,10 @@ public class MultiPageActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         String newFileName = stagingFiles.get(position - 1).getPath();
-        File toOpen = new File( newFileName );
+        File toOpen = new File(newFileName);
 
         Uri sharedFileUri = FileProvider.getUriForFile(view.getContext(), "com.teesteknoloji.contractanalysis.provider", toOpen);
-        intent.setDataAndType( sharedFileUri, "image/png");
+        intent.setDataAndType(sharedFileUri, "image/png");
         PackageManager pm = view.getContext().getPackageManager();
 
         if (intent.resolveActivity(pm) != null) {
@@ -146,14 +145,14 @@ public class MultiPageActivity extends AppCompatActivity {
         public ImageAdapterGridView(Context c) {
             mContext = c;
 
-            final String stagingDirPath =  getApplicationContext().getString( R.string.base_staging_path);
-            stagingFiles = FileIOUtils.getAllFiles( stagingDirPath );
+            final String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
+            stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
 
             registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     super.onChanged();
-                    stagingFiles = FileIOUtils.getAllFiles( stagingDirPath );
+                    stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
                 }
             });
         }
@@ -175,25 +174,25 @@ public class MultiPageActivity extends AppCompatActivity {
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
-            int width = (displayMetrics.widthPixels - 100 )/ 3;
-            int height = ( width / 3 ) * 4;
+            int width = (displayMetrics.widthPixels - 100) / 3;
+            int height = (width / 3) * 4;
 
-            if ( position == 0 ){
+            if (position == 0) {
 
                 View addMoreView = getLayoutInflater().inflate(R.layout.add_more_img, null);
                 addMoreView.setLayoutParams(new GridView.LayoutParams(width, height));
                 return addMoreView;
 
-            }else {
+            } else {
 
                 View eachFileView = getLayoutInflater().inflate(R.layout.each_file_img, null);
-                eachFileView.setLayoutParams(new GridView.LayoutParams( width, height ));
+                eachFileView.setLayoutParams(new GridView.LayoutParams(width, height));
 
                 ImageView deleteButton = eachFileView.findViewById(R.id.each_file_delete);
                 deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        stagingFiles.get( stagingFiles.size() - position ).delete();
+                        stagingFiles.get(stagingFiles.size() - position).delete();
                         notifyDataSetChanged();
                     }
                 });
@@ -201,14 +200,14 @@ public class MultiPageActivity extends AppCompatActivity {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = 3;
 
-                File imgFile = stagingFiles.get( stagingFiles.size() - position );
-                Bitmap myBitmap = BitmapFactory.decodeFile( imgFile.getAbsolutePath(), options );
+                File imgFile = stagingFiles.get(stagingFiles.size() - position);
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath(), options);
 
                 ImageView imageView = eachFileView.findViewById(R.id.each_file_screenshot);
                 imageView.setImageBitmap(myBitmap);
 
                 TextView textView = eachFileView.findViewById(R.id.each_pageno);
-                textView.setText("Page " + (stagingFiles.size() - position  + 1 ) );
+                textView.setText("Sayfa " + (stagingFiles.size() - position + 1));
 
                 return eachFileView;
             }

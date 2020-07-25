@@ -14,19 +14,19 @@
         style="@style/Widget.AppCompat.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
         android:background="@drawable/capsule_bg"
+        android:fontFamily="@font/font_regular"
         android:orientation="horizontal"
         android:padding="@dimen/bottom_bar_padding"
-        android:fontFamily="@font/font_regular"
-        android:textFontWeight="600"
-        android:textAllCaps="false"
         android:text="@string/continue_add"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
+        android:textFontWeight="600"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline2"></Button>
 
     <Button
@@ -34,20 +34,22 @@
         style="@style/Widget.AppCompat.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_regular"
-        android:textFontWeight="600"
-        android:textAllCaps="false"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/capsule_bg"
+        android:fontFamily="@font/font_regular"
         android:orientation="horizontal"
         android:padding="@dimen/bottom_bar_padding"
         android:text="@string/finish"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
+        android:textFontWeight="600"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"></Button>
+        app:layout_constraintTop_toTopOf="@+id/guideline2"
+        tools:visibility="gone"></Button>
 
     <TextView
         android:id="@+id/pageNumber"
@@ -56,10 +58,12 @@
         android:paddingRight="10dp"
         android:paddingBottom="20dp"
         android:text="1"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/addBtn"
         app:layout_constraintEnd_toStartOf="@+id/addBtn"
         app:layout_constraintStart_toEndOf="@+id/doneButton"
-        app:layout_constraintTop_toTopOf="@+id/addBtn" />
+        app:layout_constraintTop_toTopOf="@+id/addBtn"
+        tools:visibility="gone" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

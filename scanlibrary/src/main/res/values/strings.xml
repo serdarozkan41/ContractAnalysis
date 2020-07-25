@@ -16,5 +16,5 @@
     <string name="base_staging_path">ContractAnalysis/stage/</string>
     <string name="base_scantmp_path">ContractAnalysis/scantmp/</string>
     <string name="finish">Bitir</string>
-    <string name="continue_add">Sayfa Ekle</string>
+    <string name="continue_add">Devam Et</string>
 </resources>
