@@ -1,78 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/baseLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/colorBackgroundGray"
     tools:context=".MainActivity">
 
 
-    <RelativeLayout
+    <Button
+        android:id="@+id/BuScan"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="32dp"
+        android:onClick="openCamera"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:background="@android:color/black"
+        android:fontFamily="@font/font_regular"
+        android:text="Taramayı Başlat"
+        android:textFontWeight="600"
+        android:textAllCaps="false"
+        android:textSize="18dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toBottomOf="@+id/TbContractNumber" />
+
+    <EditText
+        android:id="@+id/TbContractNumber"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/rounded_edittext"
+        android:ems="10"
+        android:fontFamily="@font/font_regular"
+        android:hint="Sözleşme Numarası"
+        android:inputType="number"
+        android:nextFocusDown="@+id/BuLogin"
+        android:paddingLeft="25dp"
+        android:textColor="@android:color/black"
+        android:textColorHint="@color/bottom_background_color"
+        android:textFontWeight="600"
+        android:textSize="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/DbScanForms" />
+
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/DbProducts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="50dp"
 
-        <Button
-            android:id="@+id/scanBtn"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="175dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/margin_bottom_button"
-            android:background="@drawable/capsule_bg"
-            android:drawableStart="@drawable/ic_fab_camera"
-            android:onClick="openCamera"
-            android:orientation="horizontal"
-            android:padding="@dimen/bottom_bar_padding"
-            android:text="scan"
-            android:textColor="@android:color/white"></Button>
+        android:layout_marginEnd="32dp"
+        android:elevation="1dp"
+        android:fontFamily="@font/font_regular"
+        android:shadowColor="@color/appRed"
+        android:textColor="@android:color/black"
+        android:textFontWeight="600"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:ms_hint="Ürün Seçiniz"
+        app:ms_hint_color="@color/bottom_background_color"
+        tools:ignore="MissingConstraints" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rw"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/empty_list">
-        </androidx.recyclerview.widget.RecyclerView>
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/DbCampaings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
 
-        <LinearLayout
-            android:id="@+id/empty_list"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical|center_horizontal"
-            android:orientation="vertical">
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:elevation="1dp"
+        android:fontFamily="@font/font_regular"
+        android:shadowColor="@color/appRed"
+        android:textColor="@android:color/black"
+        android:textFontWeight="600"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/DbProducts"
+        app:ms_hint="Kampanya Seçiniz"
+        app:ms_hint_color="@color/bottom_background_color"
+        tools:ignore="MissingConstraints" />
 
-            <ImageView
-                android:id="@+id/empty_list_icon"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:background="@drawable/ic_no_data" />
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/DbFormTypes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:elevation="1dp"
+        android:fontFamily="@font/font_regular"
+        android:shadowColor="@color/appRed"
+        android:textColor="@android:color/black"
+        android:textFontWeight="600"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/DbCampaings"
+        app:ms_hint="Form Tipi Seçiniz"
+        app:ms_hint_color="@color/bottom_background_color"
+        tools:ignore="MissingConstraints" />
 
-            <TextView
-                android:id="@+id/empty_list_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:text="Your List Is Empty"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:textSize="24dp"
-                android:gravity="center_horizontal"/>
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/DbScanForms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:elevation="1dp"
+        android:fontFamily="@font/font_regular"
+        android:shadowColor="@color/appRed"
+        android:textColor="@android:color/black"
+        android:textFontWeight="600"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/DbFormTypes"
+        app:ms_hint="Form Seçiniz"
+        app:ms_hint_color="@color/bottom_background_color"
+        tools:ignore="MissingConstraints" />
 
-            <TextView
-                android:id="@+id/empty_list_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Scan a document and start creating a list"
-                android:paddingLeft="40dp"
-                android:paddingRight="40dp"
-                android:gravity="center_horizontal" />
+    <include
+        layout="@layout/include_progress_overlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
-
-
-    </RelativeLayout>
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

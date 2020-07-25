@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.teesteknoloji.contractanalysis.persistance.DocumentViewModel;
 import com.teesteknoloji.contractanalysis.persistance.Document;
 import com.teesteknoloji.contractanalysis.utils.DialogUtil;
@@ -60,13 +63,21 @@ public class MainActivity extends AppCompatActivity {
     private final Context c = this;
     private List<Uri> scannedBitmaps = new ArrayList<>();
 
-    private DocumentViewModel viewModel;
-    private LinearLayout emptyLayout;
+   // private DocumentViewModel viewModel;
+    //private LinearLayout emptyLayout;
 
-    private String searchText = "";
+  //  private String searchText = "";
     LiveData<List<Document>> liveData;
 
+    MaterialSpinner DbProducts;
+    MaterialSpinner DbCampaings;
+    MaterialSpinner DbFormTypes;
+    MaterialSpinner DbScanForms;
+    EditText TbContractNumber;
+    private List<String> ProductList;
+
     public MainActivity() {
+
     }
 
     @Override
@@ -74,9 +85,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView recyclerView = findViewById(R.id.rw);
-
-        UIUtil.setLightNavigationBar( recyclerView, this );
         PermissionUtil.ask(this);
 
         final String baseStorageDirectory =  getApplicationContext().getString( R.string.base_storage_path);
@@ -88,35 +96,59 @@ public class MainActivity extends AppCompatActivity {
         final String scanningTmpDirectory =  getApplicationContext().getString( R.string.base_scantmp_path);
         FileIOUtils.mkdir( scanningTmpDirectory );
 
-        this.emptyLayout = findViewById(R.id.empty_list);
+        InitComponents();
+    }
 
-        viewModel = ViewModelProviders.of(this).get(DocumentViewModel.class);
+    private void InitComponents(){
+        DbProducts = findViewById(R.id.DbProducts);
+        DbCampaings = findViewById(R.id.DbCampaings);
+        DbFormTypes = findViewById(R.id.DbFormTypes);
+        DbScanForms = findViewById(R.id.DbScanForms);
+        TbContractNumber = findViewById(R.id.TbContractNumber);
 
-        fileAdapter = new FLAdapter( viewModel, this);
-        recyclerView.setAdapter( fileAdapter );
+        ProductList = new ArrayList<>();
+        ProductList.add("Kampong Thom");
+        ProductList.add("Kampong Cham");
+        ProductList.add("Kampong Chhnang");
+        ProductList.add("Phnom Penh");
+        ProductList.add("Kandal");
+        ProductList.add("Kampot");
 
-        liveData = viewModel.getAllDocuments();
-        liveData.observe(this, new Observer<List<Document>>() {
-                    @Override
-                    public void onChanged(@Nullable List<Document> documents) {
+        DbProducts.setItems(ProductList);
 
-                        if( documents.size() > 0 ){
-                            emptyLayout.setVisibility(View.GONE);
+        DbProducts.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-                        } else {
-                            emptyLayout.setVisibility(View.VISIBLE);
-                        }
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
+            }
+        });
 
-                        fileAdapter.setData(documents);
-                    }
-                });
+        DbCampaings.setItems(ProductList);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        DbCampaings.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), linearLayoutManager.getOrientation());
-        recyclerView.addItemDecoration(dividerItemDecoration);
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+        DbFormTypes.setItems(ProductList);
+
+        DbFormTypes.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+        DbScanForms.setItems(ProductList);
+
+        DbScanForms.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -240,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
                             newDocument.setPath( filename );
                             newDocument.setScanned( timestampView );
                             newDocument.setPageCount( pdfWriter.getPageCount() );
-                            viewModel.saveDocument(newDocument);
+                            //viewModel.saveDocument(newDocument);
 
                             pdfWriter.close();
 
@@ -309,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
                     newDocument.setPath(filename);
                     newDocument.setScanned(timestampView);
                     newDocument.setPageCount(pdfWriter.getPageCount());
-                    viewModel.saveDocument(newDocument);
+                    //viewModel.saveDocument(newDocument);
 
                     pdfWriter.close();
 

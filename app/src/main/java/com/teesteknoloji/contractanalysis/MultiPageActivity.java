@@ -10,6 +10,7 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -66,6 +67,31 @@ public class MultiPageActivity extends AppCompatActivity {
                 else showImage(stagingFiles, position, view);
             }
         });
+
+
+       setMargins(pagesGridView,20,20+getStatusBarHeight(),20,20);
+    }
+
+    private void setMargins (View view, int left, int top, int right, int bottom) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            p.setMargins(left, top, right, bottom);
+            view.requestLayout();
+        }
+    }
+
+    private int getStatusBarHeight() {
+        int height;
+        Resources myResources = getResources();
+        int idStatusBarHeight = myResources.getIdentifier( "status_bar_height", "dimen", "android");
+        if (idStatusBarHeight > 0) {
+            height = getResources().getDimensionPixelSize(idStatusBarHeight);
+            Toast.makeText(this, "Status Bar Height = " + height, Toast.LENGTH_LONG).show();
+        } else {
+            height = 0;
+            Toast.makeText(this, "Resources NOT found", Toast.LENGTH_LONG).show();
+        }
+        return height;
     }
 
     @Override

@@ -33,10 +33,6 @@ public class ResultFragment extends Fragment {
     private Button doneButton;
     private Button addButton;
     private Bitmap original;
-    private Button originalButton;
-    private Button MagicColorButton;
-    private Button grayModeButton;
-    private Button bwButton;
     private Bitmap transformed;
     private TextView pageNumber;
     private static ProgressDialogFragment progressDialogFragment;
@@ -48,20 +44,13 @@ public class ResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.result_layout, null);
         init();
+
         return view;
     }
 
     private void init() {
-        scannedImageView = (ImageView) view.findViewById(R.id.scannedImage);
-        originalButton = (Button) view.findViewById(R.id.original);
-        originalButton.setOnClickListener(new OriginalButtonClickListener());
-        MagicColorButton = (Button) view.findViewById(R.id.magicColor);
-        MagicColorButton.setOnClickListener(new MagicColorButtonClickListener());
-        grayModeButton = (Button) view.findViewById(R.id.grayMode);
-        grayModeButton.setOnClickListener(new GrayButtonClickListener());
-        bwButton = (Button) view.findViewById(R.id.BWMode);
-        bwButton.setOnClickListener(new BWButtonClickListener());
         Bitmap bitmap = getBitmap();
+        scannedImageView = view.findViewById(R.id.scannedImage);
         setScannedImage(bitmap);
         doneButton = (Button) view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new DoneButtonClickListener());
@@ -146,35 +135,40 @@ public class ResultFragment extends Fragment {
         @Override
         public void onClick(View v) {
             showProgressDialog(getResources().getString(R.string.loading));
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Intent data = new Intent();
-                        Bitmap bitmap = transformed;
-                        if (bitmap == null) {
-                            bitmap = original;
-                        }
-                        Uri uri = Utils.getUri(getActivity(), bitmap);
-                        data.putExtra(ScanConstants.SCANNED_RESULT, uri);
-                        data.putExtra(ScanConstants.SCAN_MORE, true);
-                        getActivity().setResult(Activity.RESULT_OK, data);
+GoMultiPage();
 
-                        original.recycle();
-                        System.gc();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismissDialog();
-                                getActivity().finish();
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
         }
+    }
+
+    private  void GoMultiPage(){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent data = new Intent();
+                    Bitmap bitmap = transformed;
+                    if (bitmap == null) {
+                        bitmap = original;
+                    }
+                    Uri uri = Utils.getUri(getActivity(), bitmap);
+                    data.putExtra(ScanConstants.SCANNED_RESULT, uri);
+                    data.putExtra(ScanConstants.SCAN_MORE, true);
+                    getActivity().setResult(Activity.RESULT_OK, data);
+
+                    original.recycle();
+                    System.gc();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            dismissDialog();
+                            getActivity().finish();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private class BWButtonClickListener implements View.OnClickListener {

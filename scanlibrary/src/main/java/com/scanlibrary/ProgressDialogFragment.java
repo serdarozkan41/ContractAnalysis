@@ -21,7 +21,8 @@ public class ProgressDialogFragment extends DialogFragment {
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		final ProgressDialog dialog = new ProgressDialog(getActivity());
-		dialog.setIndeterminate(true);
+
+	dialog.setIndeterminate(true);
 		dialog.setMessage(message);
 		dialog.setCancelable(false);
 		dialog.setCanceledOnTouchOutside(false);

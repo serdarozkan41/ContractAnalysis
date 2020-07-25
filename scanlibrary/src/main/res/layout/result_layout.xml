@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="false"
@@ -7,107 +10,80 @@
     android:orientation="vertical">
 
     <Button
-        android:id="@+id/doneButton"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="false"
-        android:layout_marginLeft="32dp"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/ic_outline_save_color_24px"
-        android:textColor="@android:color/white" />
-
-    <Button
         android:id="@+id/addBtn"
         style="@style/Widget.AppCompat.Button"
-        android:layout_width="175dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:background="@drawable/capsule_bg"
-        android:drawableStart="@drawable/ic_outline_navigate_next_24px"
         android:orientation="horizontal"
         android:padding="@dimen/bottom_bar_padding"
-        android:text="@string/scan"
-        android:textColor="@android:color/white"></Button>
+        android:fontFamily="@font/font_regular"
+        android:textFontWeight="600"
+        android:textAllCaps="false"
+        android:text="@string/continue_add"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/guideline2"></Button>
+
+    <Button
+        android:id="@+id/doneButton"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/font_regular"
+        android:textFontWeight="600"
+        android:textAllCaps="false"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/capsule_bg"
+        android:orientation="horizontal"
+        android:padding="@dimen/bottom_bar_padding"
+        android:text="@string/finish"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline2"></Button>
 
     <TextView
         android:id="@+id/pageNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="@dimen/margin_bottom_button"
         android:paddingRight="10dp"
         android:paddingBottom="20dp"
-        android:text="1" />
+        android:text="1"
+        app:layout_constraintBottom_toBottomOf="@+id/addBtn"
+        app:layout_constraintEnd_toStartOf="@+id/addBtn"
+        app:layout_constraintStart_toEndOf="@+id/doneButton"
+        app:layout_constraintTop_toTopOf="@+id/addBtn" />
 
-    <LinearLayout
-        android:id="@+id/topBar"
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:background="@color/colorPrimary">
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
-        <Button
-            android:id="@+id/original"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:drawableTop="@drawable/ic_image"
-            android:padding="10dp"
-            android:text="Original"
-            android:textColor="@android:color/white" />
-
-        <Button
-            android:id="@+id/magicColor"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:drawableTop="@drawable/ic_enhamce_image"
-            android:padding="10dp"
-            android:singleLine="true"
-            android:text="Auto"
-            android:textColor="@android:color/white" />
-
-        <Button
-            android:id="@+id/grayMode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:drawableTop="@drawable/ic_gray"
-            android:padding="10dp"
-            android:singleLine="true"
-            android:text="Gray"
-            android:textColor="@android:color/white" />
-
-        <Button
-            android:id="@+id/BWMode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:drawableTop="@drawable/ic_black_and_white"
-            android:padding="10dp"
-            android:singleLine="true"
-            android:text="B/W"
-            android:textColor="@android:color/white" />
-    </LinearLayout>
-
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8" />
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/topBar"
-        android:layout_gravity="center"
-        android:layout_margin="@dimen/scanPadding">
-
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -122,4 +98,5 @@
         </RelativeLayout>
     </FrameLayout>
 
-</RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

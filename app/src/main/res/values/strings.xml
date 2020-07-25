@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">Clean Scan</string>
-    <string name="base_storage_path">PDF Scanner/data/</string>
-    <string name="base_staging_path">PDF Scanner/stage/</string>
+    <string name="app_name">Sözleşme Analiz</string>
+    <string name="base_storage_path">ContactAnalysis/data/</string>
+    <string name="base_staging_path">ContactAnalysis/stage/</string>
     <string name="search_hint">Search Documents</string>
 
-    <string name="scan_shortcut_short_label">New Document</string>
-    <string name="scan_shortcut_long_label">Scan A New Document</string>
-    <string name="scan_disabled_message">Scanning Disabled</string>
+    <string name="scan_shortcut_short_label">Yeni Döküman</string>
+    <string name="scan_shortcut_long_label">Yeni Döküman</string>
+    <string name="scan_disabled_message">Tarama Kapalı</string>
 
     <string name="ocr_waiting_text">Extracting Text, Please Wait ...</string>
     <string name="ocr_failed_text">Unable to Extract Any Text.</string>
@@ -50,5 +50,8 @@
     <string name="image_quality_title">Image Quality</string>
     <string name="key_image_quality">IMAGE_QUALITY</string>
     <string name="value_image_quality">FAST</string>
+    <string name="imgDesc">imgDesc</string>
+    <string name="giris_yap">Giriş Yap</string>
+    <string name="phoneMask">Numara Giriniz 5XX</string>
 
 </resources>
