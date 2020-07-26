@@ -5,6 +5,11 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,19 +24,34 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.transition.Explode;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.mlkit.vision.barcode.Barcode;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.common.InputImage;
 import com.google.zxing.BinaryBitmap;
+import com.google.zxing.ChecksumException;
+import com.google.zxing.FormatException;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Reader;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+import com.google.zxing.qrcode.QRCodeReader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by jhansi on 29/03/15.
@@ -78,22 +98,85 @@ public class ResultFragment extends Fragment {
         } else {
             pageNumber.setText( "1" );
         }
-/*
-        Result[] sonu7clar = detectBarCode(bitmap);
+        String foundedQR= "";
+
+
+        Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
+        Canvas canvas = new Canvas(cutBitmap);
+        Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+        Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
+        canvas.drawBitmap(bitmap, srcRect, desRect, null);
+
+        setScannedImage(cutBitmap);
+
+        String a = detectBarCode(cutBitmap);
+        Log.e("SONUC XİNG: ",a);
+        pageNumber.setText(a);
+
+
+
+        InputImage image = InputImage.fromBitmap(cutBitmap,1);
+
+        BarcodeScanner scanner = BarcodeScanning.getClient();
+
+
+        Task<List<Barcode>> result = scanner.process(image)
+                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                    @Override
+                    public void onSuccess(List<Barcode> barcodes) {
+                        // Task completed successfully
+                        // ...
+                        Log.e("SONUC Google: ",barcodes.get(0).getDisplayValue());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("SONUC Google: ",e.getMessage());
+                    }
+                });
+
+       /* int fromHere = (int) (bitmap.getHeight() * 0.2);
+        Bitmap TopBitmap = ConvertGray(Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), fromHere));
+        int fromHere2 = (int) (bitmap.getWidth() / 0.2);
+        Bitmap LeftBitmap = ConvertGray(Bitmap.createBitmap(bitmap, 0, 0, fromHere2, TopBitmap.getHeight()));
+        setScannedImage(LeftBitmap);*/
+
+   /*     Result[] sonu7clar = detectBarCode(croppedBitmap);
         if (sonu7clar != null) {
             Log.e("BULAMDIM: ", String.valueOf(sonu7clar.length));
             for (Result res : sonu7clar)
             {
-                Log.e("SONUC: ", res.getText());
+                String qr = res.getText();
+                if (qr.length()==11){
+                    foundedQR=qr;
+                }
             }
         }
         else{
             Log.e("BULAMDIM: ","");
-        }
-       */
+        }*/
+
 
         dismissDialog();
     }
+
+    private Bitmap ConvertGray(Bitmap bmpOriginal){
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+
+        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpGrayscale);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return bmpGrayscale;
+    }
+
 
     private Bitmap getBitmap() {
 
@@ -114,22 +197,27 @@ public class ResultFragment extends Fragment {
         return null;
     }
 
-    Result[] detectBarCode(Bitmap bitmap) {
+    String detectBarCode(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
         LuminanceSource source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
-        //Reader reader = new QRCodeReader();
-        QRCodeMultiReader reader = new QRCodeMultiReader();
+        Reader reader = new QRCodeReader();
+        //QRCodeMultiReader reader = new QRCodeMultiReader();
 
         try {
-            Result[] result = reader.decodeMultiple(new BinaryBitmap(new HybridBinarizer(source)));
-            return result;
-
+            Result result = reader.decode(new BinaryBitmap(new HybridBinarizer(source)));
+            return result.getText();
         } catch (NotFoundException e) {
             e.printStackTrace();
-            return null;
+            return "" ;
+        } catch (FormatException e) {
+            e.printStackTrace();
+            return "";
+        } catch (ChecksumException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 

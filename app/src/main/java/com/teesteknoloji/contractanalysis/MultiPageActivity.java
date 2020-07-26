@@ -224,58 +224,15 @@ public class MultiPageActivity extends AppCompatActivity {
                 ImageView imageView = eachFileView.findViewById(R.id.each_file_screenshot);
                 imageView.setImageBitmap(myBitmap);
 
-                String foundedQR= "";
 
 
-
-                int fromHere = (int) (myBitmap.getHeight() * 0.2);
-                final Bitmap croppedBitmap = ConvertGray(Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), fromHere));
-
-
-                Result[] sonu7clar = detectBarCode(croppedBitmap);
-                if (sonu7clar != null) {
-                    Log.e("BULAMDIM: ", String.valueOf(sonu7clar.length));
-                    for (Result res : sonu7clar)
-                    {
-                        String qr = res.getText();
-                        if (qr.length()==11){
-                            foundedQR=qr;
-                        }
-                    }
-                }
-                else{
-                    Log.e("BULAMDIM: ","");
-                }
-
-                if (foundedQR.length()>0)
-                {
-                    TextView textView = eachFileView.findViewById(R.id.each_pageno);
-                    textView.setText(foundedQR);
-                }
-                else{
                     TextView textView = eachFileView.findViewById(R.id.each_pageno);
                     textView.setText("Sayfa " + (stagingFiles.size() - position + 1));
-                }
+
 
 
                 return eachFileView;
             }
-        }
-
-        private Bitmap ConvertGray(Bitmap bmpOriginal){
-            int width, height;
-            height = bmpOriginal.getHeight();
-            width = bmpOriginal.getWidth();
-
-            Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(bmpGrayscale);
-            Paint paint = new Paint();
-            ColorMatrix cm = new ColorMatrix();
-            cm.setSaturation(0);
-            ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
-            paint.setColorFilter(f);
-            c.drawBitmap(bmpOriginal, 0, 0, paint);
-            return bmpGrayscale;
         }
 
         private Result[] detectBarCode(Bitmap bitmap) {

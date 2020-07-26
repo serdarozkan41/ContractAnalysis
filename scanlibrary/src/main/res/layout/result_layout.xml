@@ -59,10 +59,12 @@
         android:paddingBottom="20dp"
         android:text="1"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/addBtn"
-        app:layout_constraintEnd_toStartOf="@+id/addBtn"
-        app:layout_constraintStart_toEndOf="@+id/doneButton"
-        app:layout_constraintTop_toTopOf="@+id/addBtn"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintEnd_toEndOf="@+id/frameLayout"
+        app:layout_constraintHorizontal_bias="0.83"
+        app:layout_constraintStart_toStartOf="@+id/frameLayout"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.84000003"
         tools:visibility="gone" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -80,6 +82,7 @@
         app:layout_constraintGuide_percent="0.8" />
 
     <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="1dp"
@@ -88,6 +91,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">

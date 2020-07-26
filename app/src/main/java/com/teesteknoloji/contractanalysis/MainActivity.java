@@ -43,9 +43,9 @@ import com.teesteknoloji.contractanalysis.utils.OCRUtils;
 import com.teesteknoloji.contractanalysis.utils.PDFWriterUtil;
 import com.teesteknoloji.contractanalysis.utils.PermissionUtil;
 import com.teesteknoloji.contractanalysis.utils.UIUtil;
-import com.google.android.gms.vision.Frame;
+/*import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
-import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.android.gms.vision.text.TextRecognizer;*/
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.scanlibrary.ScanActivity;

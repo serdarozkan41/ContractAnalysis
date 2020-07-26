@@ -7,16 +7,17 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+/*
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
-import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;*/
 
 public class OCRUtils {
 
     public static String getTextFromBitmap( final Context context, Bitmap bitmap ) throws InterruptedException{
 
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+       /* FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
         FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
 
         Task<FirebaseVisionText> result =
@@ -32,9 +33,10 @@ public class OCRUtils {
 
         while(! result.isComplete() ){
             Thread.sleep(300);
-        }
+        }*/
 
-        return result.isSuccessful() ? result.getResult().getText() : null;
+        //return result.isSuccessful() ? result.getResult().getText() : null;
+        return  "";
     }
 
 /*    public static String getTextFromBitmap(Context context, Bitmap bitmap ){
