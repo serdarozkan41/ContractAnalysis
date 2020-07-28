@@ -1,4 +1,4 @@
-package com.teesteknoloji.contractanalysis;
+package com.teesteknoloji.contractanalysis.unuseds;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.teesteknoloji.contractanalysis.R;
 import com.teesteknoloji.contractanalysis.utils.OCRUtils;
 import com.teesteknoloji.contractanalysis.utils.UIUtil;
 

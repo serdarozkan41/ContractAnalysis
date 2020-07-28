@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:usesCleartextTraffic="true"
         android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,14 +17,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".views.LoginActivity"></activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".unuseds.SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".MultiPageActivity" />
-        <activity android:name=".IntroActivity" />
+        <activity android:name=".views.MultiPageActivity" />
+        <activity android:name=".unuseds.IntroActivity" />
         <activity
-            android:name=".SplashScreen"
+            android:name=".views.SplashScreen"
             android:theme="@style/AppTheme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,15 +39,15 @@
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
                 android:value="ocr" />
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".views.MainActivity">
             <meta-data
                 android:name="com.google.android.gms.vision.DEPENDENCIES"
                 android:value="ocr" />
         </activity>
         <activity
-            android:name=".SearchableActivity"
+            android:name=".unuseds.SearchableActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".views.MainActivity"
             android:theme="@style/AppThemeSearch">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -57,8 +58,8 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".OCRActivity"
-            android:parentActivityName=".MainActivity" />
+            android:name=".unuseds.OCRActivity"
+            android:parentActivityName=".views.MainActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

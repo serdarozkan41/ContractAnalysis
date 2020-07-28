@@ -1,53 +1,41 @@
-package com.teesteknoloji.contractanalysis;
+package com.teesteknoloji.contractanalysis.views;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.os.Bundle;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.developer.kalert.KAlertDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
-import com.teesteknoloji.contractanalysis.persistance.DocumentViewModel;
+import com.scanlibrary.BitmapTransporter;
+import com.teesteknoloji.contractanalysis.R;
+import com.teesteknoloji.contractanalysis.unuseds.SearchableActivity;
+import com.teesteknoloji.contractanalysis.unuseds.SettingsActivity;
 import com.teesteknoloji.contractanalysis.persistance.Document;
 import com.teesteknoloji.contractanalysis.utils.DialogUtil;
 import com.teesteknoloji.contractanalysis.utils.DialogUtilCallback;
 import com.teesteknoloji.contractanalysis.fileView.FLAdapter;
 import com.teesteknoloji.contractanalysis.utils.FileIOUtils;
 import com.teesteknoloji.contractanalysis.utils.FileWritingCallback;
-import com.teesteknoloji.contractanalysis.utils.OCRUtils;
 import com.teesteknoloji.contractanalysis.utils.PDFWriterUtil;
 import com.teesteknoloji.contractanalysis.utils.PermissionUtil;
-import com.teesteknoloji.contractanalysis.utils.UIUtil;
 /*import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;*/
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.TedPermission;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
 
@@ -407,8 +395,15 @@ public class MainActivity extends AppCompatActivity {
 
             boolean saveMode = data.getExtras().containsKey(ScanConstants.SAVE_PDF) ? data.getExtras().getBoolean(ScanConstants.SAVE_PDF) : Boolean.FALSE;
             if (saveMode) {
-                savePdf();
+               List<BitmapTransporter> ll = ScanConstants.bitmapTransporterList;
 
+                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
+                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                pDialog.setTitleText("Sonuç");
+                pDialog.setContentText(String.valueOf(ll.size()));
+                pDialog.setConfirmText("Tamam");
+                pDialog.setCancelable(false);
+                pDialog.show();
             } else {
                 Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
                 boolean doScanMore = data.getExtras().getBoolean(ScanConstants.SCAN_MORE);

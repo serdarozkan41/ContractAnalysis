@@ -16,7 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.teesteknoloji.contractanalysis.OCRActivity;
+import com.teesteknoloji.contractanalysis.unuseds.OCRActivity;
 import com.teesteknoloji.contractanalysis.R;
 import com.teesteknoloji.contractanalysis.persistance.Document;
 import com.teesteknoloji.contractanalysis.persistance.DocumentViewModel;
@@ -25,9 +25,7 @@ import com.teesteknoloji.contractanalysis.utils.DialogUtilCallback;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FLAdapter extends RecyclerView.Adapter<FLViewHolder> {
 

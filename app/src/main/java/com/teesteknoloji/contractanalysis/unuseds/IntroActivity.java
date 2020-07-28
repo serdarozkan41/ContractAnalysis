@@ -1,4 +1,4 @@
-package com.teesteknoloji.contractanalysis;
+package com.teesteknoloji.contractanalysis.unuseds;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,10 +14,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import com.teesteknoloji.contractanalysis.R;
 import com.teesteknoloji.contractanalysis.intro.IntroItem;
 import com.teesteknoloji.contractanalysis.intro.IntroViewPagerAdapter;
 import com.teesteknoloji.contractanalysis.utils.UIUtil;
 import com.google.android.material.tabs.TabLayout;
+import com.teesteknoloji.contractanalysis.views.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +123,7 @@ public class IntroActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 //open main activity
-                Intent mainActivity = new Intent(getApplicationContext(),MainActivity.class);
+                Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
 
                 startActivity(mainActivity);
                 // also we need to save a boolean value to storage so next time when the user run the app

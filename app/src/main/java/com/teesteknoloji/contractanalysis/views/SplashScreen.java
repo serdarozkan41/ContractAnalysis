@@ -1,14 +1,12 @@
-package com.teesteknoloji.contractanalysis;
+package com.teesteknoloji.contractanalysis.views;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.pixplicity.easyprefs.library.Prefs;
-import com.teesteknoloji.contractanalysis.persistance.DocumentDatabase;
 
 public class SplashScreen extends AppCompatActivity {
 

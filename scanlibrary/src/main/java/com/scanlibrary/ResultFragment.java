@@ -27,6 +27,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.transition.Explode;
 
+import com.developer.kalert.KAlertDialog;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -81,24 +82,24 @@ public class ResultFragment extends Fragment {
     private void init() {
         showProgressDialog(getResources().getString(R.string.loading));
         Bitmap bitmap = getBitmap();
+        bitmap = ConvertGray(bitmap);
         scannedImageView = view.findViewById(R.id.scannedImage);
         setScannedImage(bitmap);
         doneButton = (Button) view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new DoneButtonClickListener());
         addButton = (Button) view.findViewById(R.id.addBtn);
         addButton.setOnClickListener(new AddButtonClickListener());
-        pageNumber =  (TextView) view.findViewById(R.id.pageNumber);
+        pageNumber = (TextView) view.findViewById(R.id.pageNumber);
 
         final File sd = Environment.getExternalStorageDirectory();
-        final String stagingDirPath = view.getContext().getString( R.string.base_staging_path );
-        final File stagingDir = new File( sd, stagingDirPath );
-        if( stagingDir.listFiles() != null && stagingDir.listFiles().length > 0 ){
-            pageNumber.setText( String.valueOf( stagingDir.listFiles().length + 1) );
+        final String stagingDirPath = view.getContext().getString(R.string.base_staging_path);
+        final File stagingDir = new File(sd, stagingDirPath);
+        if (stagingDir.listFiles() != null && stagingDir.listFiles().length > 0) {
+            pageNumber.setText(String.valueOf(stagingDir.listFiles().length + 1));
 
         } else {
-            pageNumber.setText( "1" );
+            pageNumber.setText("1");
         }
-        String foundedQR= "";
 
 
         Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
@@ -107,61 +108,60 @@ public class ResultFragment extends Fragment {
         Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
         canvas.drawBitmap(bitmap, srcRect, desRect, null);
 
-        setScannedImage(cutBitmap);
-
-        String a = detectBarCode(cutBitmap);
-        Log.e("SONUC XİNG: ",a);
-        pageNumber.setText(a);
-
-
-
-        InputImage image = InputImage.fromBitmap(cutBitmap,1);
-
-        BarcodeScanner scanner = BarcodeScanning.getClient();
+        //setScannedImage(cutBitmap);
+        try {
+          /*  String a = detectBarCode(cutBitmap);
+            Log.e("SONUC XİNG: ", a);
+            pageNumber.setText(a);*/
 
 
-        Task<List<Barcode>> result = scanner.process(image)
-                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                    @Override
-                    public void onSuccess(List<Barcode> barcodes) {
-                        // Task completed successfully
-                        // ...
-                        Log.e("SONUC Google: ",barcodes.get(0).getDisplayValue());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("SONUC Google: ",e.getMessage());
-                    }
-                });
+            InputImage image = InputImage.fromBitmap(cutBitmap, 1);
 
-       /* int fromHere = (int) (bitmap.getHeight() * 0.2);
-        Bitmap TopBitmap = ConvertGray(Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), fromHere));
-        int fromHere2 = (int) (bitmap.getWidth() / 0.2);
-        Bitmap LeftBitmap = ConvertGray(Bitmap.createBitmap(bitmap, 0, 0, fromHere2, TopBitmap.getHeight()));
-        setScannedImage(LeftBitmap);*/
+            BarcodeScanner scanner = BarcodeScanning.getClient();
 
-   /*     Result[] sonu7clar = detectBarCode(croppedBitmap);
-        if (sonu7clar != null) {
-            Log.e("BULAMDIM: ", String.valueOf(sonu7clar.length));
-            for (Result res : sonu7clar)
-            {
-                String qr = res.getText();
-                if (qr.length()==11){
-                    foundedQR=qr;
-                }
-            }
+
+            Task<List<Barcode>> result = scanner.process(image)
+                    .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                        @Override
+                        public void onSuccess(List<Barcode> barcodes) {
+                            if (barcodes.size()==0){
+                                Warning();
+                                getFragmentManager().popBackStack();
+                            }
+                            else{
+                            Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
+                            foundedQR = barcodes.get(0).getDisplayValue();
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("SONUC Google: ", e.getMessage());
+                        }
+                    });
+
+            dismissDialog();
+
+        } catch (Exception ex) {
+            dismissDialog();
+            Warning();
+            getFragmentManager().popBackStack();
         }
-        else{
-            Log.e("BULAMDIM: ","");
-        }*/
-
-
-        dismissDialog();
     }
 
-    private Bitmap ConvertGray(Bitmap bmpOriginal){
+    private void  Warning(){
+        KAlertDialog pDialog = new KAlertDialog(getActivity(), KAlertDialog.ERROR_TYPE);
+        pDialog.getProgressHelper().setBarColor(R.color.appRed);
+        pDialog.setTitleText("Uyarı");
+        pDialog.setContentText("Barkod net değil.");
+        pDialog.setConfirmText("Tamam");
+        pDialog.setCancelable(false);
+        pDialog.show();
+        getFragmentManager().popBackStack();
+    }
+
+    private Bitmap ConvertGray(Bitmap bmpOriginal) {
         int width, height;
         height = bmpOriginal.getHeight();
         width = bmpOriginal.getWidth();
@@ -197,7 +197,7 @@ public class ResultFragment extends Fragment {
         return null;
     }
 
-    String detectBarCode(Bitmap bitmap) {
+    final String detectBarCode(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
@@ -211,7 +211,7 @@ public class ResultFragment extends Fragment {
             return result.getText();
         } catch (NotFoundException e) {
             e.printStackTrace();
-            return "" ;
+            return "";
         } catch (FormatException e) {
             e.printStackTrace();
             return "";
@@ -268,12 +268,13 @@ public class ResultFragment extends Fragment {
         @Override
         public void onClick(View v) {
             showProgressDialog(getResources().getString(R.string.loading));
-GoMultiPage();
+            GoMultiPage();
 
         }
     }
 
-    private  void GoMultiPage(){
+    String foundedQR="";
+    private void GoMultiPage() {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -284,7 +285,14 @@ GoMultiPage();
                         bitmap = original;
                     }
                     Uri uri = Utils.getUri(getActivity(), bitmap);
+                    data.putExtra(ScanConstants.SCANNED_QR,foundedQR);
                     data.putExtra(ScanConstants.SCANNED_RESULT, uri);
+
+                    BitmapTransporter bitmapTransporter = new BitmapTransporter();
+                    bitmapTransporter.BitmapPath= uri;
+                    bitmapTransporter.QrValue = foundedQR;
+                    ScanConstants.bitmapTransporterList.add(bitmapTransporter);
+
                     data.putExtra(ScanConstants.SCAN_MORE, true);
                     getActivity().setResult(Activity.RESULT_OK, data);
 

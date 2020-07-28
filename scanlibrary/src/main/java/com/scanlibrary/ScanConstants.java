@@ -1,6 +1,10 @@
 package com.scanlibrary;
 
+import android.net.Uri;
 import android.os.Environment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jhansi on 15/03/15.
@@ -14,9 +18,12 @@ public class ScanConstants {
     public final static int OPEN_CAMERA = 4;
     public final static int OPEN_MEDIA = 5;
     public final static String SCANNED_RESULT = "scannedResult";
+    public final static String SCANNED_QR = "scannedQR";
+    public final static String SCANNED_List = "scannedList";
     public final static String IMAGE_PATH = Environment.getExternalStorageDirectory().getPath() + "/ContactAnalysis/tmp";
-
+    public final static List<BitmapTransporter> bitmapTransporterList = new ArrayList<>();
     public final static String SELECTED_BITMAP = "selectedBitmap";
     public final static String SCAN_MORE = "scanMore";
     public final static String SAVE_PDF = "savePdf";
 }
+

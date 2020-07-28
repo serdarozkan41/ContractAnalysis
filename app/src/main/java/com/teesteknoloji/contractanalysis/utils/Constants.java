@@ -7,6 +7,8 @@ import android.view.View;
 import com.github.ybq.android.spinkit.style.CubeGrid;
 
 public class Constants {
+    public static final String BASE_URL = "http://test.akinozkan.blog/api/";
+
     public static void StartLoadingAnim(CubeGrid doubleBounce, View progressOverlay) {
         doubleBounce.setColor(0XFFE2171B);
         doubleBounce.start();

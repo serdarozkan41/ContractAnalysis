@@ -1,4 +1,4 @@
-package com.teesteknoloji.contractanalysis;
+package com.teesteknoloji.contractanalysis.unuseds;
 
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.teesteknoloji.contractanalysis.R;
 import com.teesteknoloji.contractanalysis.fileView.FLAdapter;
 import com.teesteknoloji.contractanalysis.persistance.Document;
 import com.teesteknoloji.contractanalysis.persistance.DocumentViewModel;

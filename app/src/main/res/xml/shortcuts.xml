@@ -10,7 +10,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.teesteknoloji.contractanalysis"
-            android:targetClass="com.teesteknoloji.contractanalysis.SplashScreen" />
+            android:targetClass="com.teesteknoloji.contractanalysis.views.SplashScreen" />
 
         <categories android:name="android.shortcut.conversation" />
     </shortcut>

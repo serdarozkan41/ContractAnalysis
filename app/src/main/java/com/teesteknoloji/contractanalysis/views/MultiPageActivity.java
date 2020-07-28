@@ -1,4 +1,4 @@
-package com.teesteknoloji.contractanalysis;
+package com.teesteknoloji.contractanalysis.views;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
@@ -48,6 +49,8 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+import com.teesteknoloji.contractanalysis.R;
+import com.teesteknoloji.contractanalysis.models.BitmapTransporter;
 import com.teesteknoloji.contractanalysis.utils.FileIOUtils;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
@@ -117,6 +120,7 @@ public class MultiPageActivity extends AppCompatActivity {
         Intent out = new Intent();
         out.putExtra(ScanConstants.SCANNED_RESULT, data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT));
         out.putExtra(ScanConstants.SCAN_MORE, data.getExtras().getBoolean(ScanConstants.SCAN_MORE));
+
         setResult(RESULT_OK, out);
         finish();
 
