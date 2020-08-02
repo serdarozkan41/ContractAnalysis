@@ -7,6 +7,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -32,19 +33,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.ChecksumException;
-import com.google.zxing.FormatException;
-import com.google.zxing.LuminanceSource;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.RGBLuminanceSource;
-import com.google.zxing.Reader;
-import com.google.zxing.Result;
-import com.google.zxing.client.android.Intents;
-import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.qrcode.QRCodeReader;
+
 import com.scanlibrary.models.Form;
 
 import java.io.ByteArrayOutputStream;
@@ -83,6 +75,7 @@ public class ResultFragment extends Fragment {
         showProgressDialog(getResources().getString(R.string.loading));
         Bitmap bitmap = getBitmap();
         bitmap = ConvertGray(bitmap);
+        final Bitmap ORJ_bitmap =bitmap;
         scannedImageView = view.findViewById(R.id.scannedImage);
         setScannedImage(bitmap);
         doneButton = (Button) view.findViewById(R.id.doneButton);
@@ -103,7 +96,7 @@ public class ResultFragment extends Fragment {
 
         addButton.setText("Tara");
         SkipMood = false;
-        ScanConstants.Skip=false;
+        ScanConstants.Skip = false;
         Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
         Canvas canvas = new Canvas(cutBitmap);
         Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
@@ -130,6 +123,12 @@ public class ResultFragment extends Fragment {
                                 } else {
                                     Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
                                     foundedQR = barcodes.get(0).getDisplayValue();
+                                    String pageType = foundedQR.substring(0, 1);
+                                    if (pageType.equals("2")) {
+                                        Log.e("Sayfada Imza Aramam Lazım ", String.valueOf(barcodes.size()));
+                                        //CutSign(ORJ_bitmap);
+                                    }
+
                                 }
                             }
                         })
@@ -153,6 +152,41 @@ public class ResultFragment extends Fragment {
         dismissDialog();
     }
 
+    private void CutSign(final Bitmap bitmap) {
+
+        InputImage image = InputImage.fromBitmap(bitmap, 1);
+        BarcodeScannerOptions options =
+                new BarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(Barcode.FORMAT_CODE_128)
+                        .build();
+
+        final BarcodeScanner scanner = BarcodeScanning.getClient(options);
+
+        Task<List<Barcode>> result = scanner.process(image)
+                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                    @Override
+                    public void onSuccess(List<Barcode> barcodes) {
+                        if (barcodes.size() == 0) {
+                            Warning();
+                        } else {
+                            for (Barcode qr : barcodes) {
+                                Rect r = qr.getBoundingBox();
+
+                                Log.e("KOD: "+qr.getDisplayValue()+", KONUM: ", String.valueOf(qr.getBoundingBox()));
+                            }
+
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("SONUC Google: ", e.getMessage());
+                        Warning();
+                    }
+                });
+    }
+
     boolean SkipMood = false;
 
     private void Warning() {
@@ -165,7 +199,7 @@ public class ResultFragment extends Fragment {
         pDialog.show();
         //getFragmentManager().popBackStack();
         addButton.setText("Tekrar Çek");
-        ScanConstants.Skip=true;
+        ScanConstants.Skip = true;
     }
 
     private Bitmap ConvertGray(Bitmap bmpOriginal) {
@@ -254,7 +288,7 @@ public class ResultFragment extends Fragment {
         @Override
         public void onClick(View v) {
             showProgressDialog(getResources().getString(R.string.loading));
-                GoMultiPage();
+            GoMultiPage();
 
         }
     }
@@ -277,10 +311,13 @@ public class ResultFragment extends Fragment {
 
                     data.putExtra(ScanConstants.SCANNED_RESULT, uri);
 
-                    BitmapTransporter bitmapTransporter = new BitmapTransporter();
-                    bitmapTransporter.BitmapPath = uri;
-                    bitmapTransporter.QrValue = foundedQR;
-                    ScanConstants.bitmapTransporterList.add(bitmapTransporter);
+                    if(ScanConstants.Skip==false) {
+                        BitmapTransporter bitmapTransporter = new BitmapTransporter();
+                        bitmapTransporter.BitmapPath = uri;
+                        bitmapTransporter.QrValue = foundedQR;
+
+                        ScanConstants.bitmapTransporterList.add(bitmapTransporter);
+                    }
 
                     data.putExtra(ScanConstants.SCAN_MORE, true);
                     getActivity().setResult(Activity.RESULT_OK, data);

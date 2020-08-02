@@ -372,12 +372,13 @@ public class MainActivity extends AppCompatActivity {
             if (saveMode) {
                 List<BitmapTransporter> ll = ScanConstants.bitmapTransporterList;
                 Log.e("SAVE MODE: ", String.valueOf(saveMode));
-              /*  try {
-                    requestUploadSurvey();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
-
+                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
+                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                pDialog.setTitleText("Sonuç");
+                pDialog.setContentText("Başarı ile kaydedildi.");
+                pDialog.setConfirmText("Tamam");
+                pDialog.setCancelable(false);
+                pDialog.show();
             } else {
                 Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
                 boolean doScanMore = data.getExtras().getBoolean(ScanConstants.SCAN_MORE);
@@ -415,73 +416,73 @@ public class MainActivity extends AppCompatActivity {
 
         return imgString;
     }
+
     private final OkHttpClient httpClient = new OkHttpClient();
 
-    private void requestUploadSurvey()  throws IOException{
-Constants.StartLoadingAnim(doubleBounce,progressOverlay);
+    private void requestUploadSurvey() throws IOException {
+        Constants.StartLoadingAnim(doubleBounce, progressOverlay);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
         SendFormRequestModel requestModel = new SendFormRequestModel();
 
-            qrList = new ArrayList<>();
-            for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
-                Image im = new Image();
-                im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
+        qrList = new ArrayList<>();
+        for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
+            Image im = new Image();
+            im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
 
-                Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
-                final File sd = Environment.getExternalStorageDirectory();
-                File src = new File(sd, ir.getPath());
-                Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
-                im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
-                //im.setImageBase64("asd");
-                qrList.add(im);
+            Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
+            final File sd = Environment.getExternalStorageDirectory();
+            File src = new File(sd, ir.getPath());
+            Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
+            im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
+            //im.setImageBase64("asd");
+            qrList.add(im);
+        }
+        requestModel.setImages(qrList);
+
+        requestModel.setFormDetail(ScanConstants.Selected_Form);
+        requestModel.setCNo(ScanConstants.CNo);
+        Gson gson = new Gson();
+        String json = gson.toJson(requestModel);
+        URL url = new URL(Constants.BASE_URL + "Form/SendForm");
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                json);
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "OkHttp Bot")
+                .post(body)
+                .build();
+
+        try (okhttp3.Response response = httpClient.newCall(request).execute()) {
+
+            if (response.isSuccessful()) {
+                Constants.StopLoadingAnim(doubleBounce, progressOverlay);
+                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
+                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                pDialog.setTitleText("Sonuç");
+                pDialog.setContentText("Başarı ile kaydedildi.");
+                pDialog.setConfirmText("Tamam");
+                pDialog.setCancelable(false);
+                pDialog.show();
+            } else {
+                Constants.StopLoadingAnim(doubleBounce, progressOverlay);
+                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.WARNING_TYPE);
+                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                pDialog.setTitleText("Sonuç");
+                pDialog.setContentText("Bir sorun oluştu.");
+                pDialog.setConfirmText("Tamam");
+                pDialog.setCancelable(false);
+                pDialog.show();
             }
-            requestModel.setImages(qrList);
 
-            requestModel.setFormDetail(ScanConstants.Selected_Form);
-            requestModel.setCNo(ScanConstants.CNo);
-                   Gson gson = new Gson();
-            String json = gson.toJson(requestModel);
-            URL url = new URL(Constants.BASE_URL+"Form/SendForm");
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json; charset=utf-8"),
-                    json);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("User-Agent", "OkHttp Bot")
-                    .post(body)
-                    .build();
-
-            try (okhttp3.Response response = httpClient.newCall(request).execute()) {
-
-                if (response.isSuccessful()){
-                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
-                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
-                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                    pDialog.setTitleText("Sonuç");
-                    pDialog.setContentText("Başarı ile kaydedildi.");
-                    pDialog.setConfirmText("Tamam");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                }
-                else        {
-                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
-                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.WARNING_TYPE);
-                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                    pDialog.setTitleText("Sonuç");
-                    pDialog.setContentText("Bir sorun oluştu.");
-                    pDialog.setConfirmText("Tamam");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                }
-
-                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                // Get response body
-                System.out.println(response.body().string());
-            }
+            // Get response body
+            System.out.println(response.body().string());
+        }
            /*MainApplication.apiManager.SendForm(requestModel, new Callback<SendResponseModel>() {
                 @Override
                 public void onResponse(Call<SendResponseModel> call, Response<SendResponseModel> response) {

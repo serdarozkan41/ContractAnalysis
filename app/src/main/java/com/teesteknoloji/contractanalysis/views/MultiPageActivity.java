@@ -49,13 +49,8 @@ import android.widget.Toast;
 import com.developer.kalert.KAlertDialog;
 import com.github.ybq.android.spinkit.style.CubeGrid;
 import com.google.gson.Gson;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.LuminanceSource;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.RGBLuminanceSource;
-import com.google.zxing.Result;
-import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+
+import com.pixplicity.easyprefs.library.Prefs;
 import com.scanlibrary.ProgressDialogFragment;
 import com.scanlibrary.models.Image;
 import com.scanlibrary.models.SendFormRequestModel;
@@ -76,6 +71,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -164,13 +160,9 @@ public class MultiPageActivity extends AppCompatActivity {
         } catch (IOException e) {
 
         }
-        Intent out = new Intent();
-        out.putExtra(ScanConstants.SAVE_PDF, Boolean.TRUE);
-        setResult(RESULT_OK, out);
-        finish();
+
     }
 
-    private final OkHttpClient httpClient = new OkHttpClient();
     List<Image> qrList = new ArrayList<>();
     private static ProgressDialogFragment progressDialogFragment;
 
@@ -191,6 +183,7 @@ public class MultiPageActivity extends AppCompatActivity {
 
         StrictMode.setThreadPolicy(policy);
         SendFormRequestModel requestModel = new SendFormRequestModel();
+        final OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(120,TimeUnit.SECONDS).readTimeout(120,TimeUnit.SECONDS).writeTimeout(120,TimeUnit.SECONDS).build();
 
         qrList = new ArrayList<>();
         for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
@@ -213,14 +206,17 @@ public class MultiPageActivity extends AppCompatActivity {
         String json = gson.toJson(requestModel);
         URL url = new URL(Constants.BASE_URL + "Form/SendForm");
 
+
         RequestBody body = RequestBody.create(
                 MediaType.parse("application/json; charset=utf-8"),
                 json);
         final Request request = new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", "OkHttp Bot")
+                .addHeader("Authorization", "Bearer " + Prefs.getString("Token",""))
                 .post(body)
                 .build();
+
 
         AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
             @Override
@@ -229,23 +225,19 @@ public class MultiPageActivity extends AppCompatActivity {
                     okhttp3.Response response = httpClient.newCall(request).execute();
                     if (response.isSuccessful()) {
                         dismissDialog();
-                        KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.SUCCESS_TYPE);
-                        pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                        pDialog.setTitleText("Sonuç");
-                        pDialog.setContentText("Başarı ile kaydedildi.");
-                        pDialog.setConfirmText("Tamam");
-                        pDialog.setCancelable(false);
-                        pDialog.show();
+
+                        Intent out = new Intent();
+                        out.putExtra(ScanConstants.SAVE_PDF, Boolean.TRUE);
+                        setResult(RESULT_OK, out);
+                        finish();
                         return response.body().string();
                     } else {
                         dismissDialog();
-                        KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.WARNING_TYPE);
-                        pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                        pDialog.setTitleText("Sonuç");
-                        pDialog.setContentText("Bir sorun oluştu.");
-                        pDialog.setConfirmText("Tamam");
-                        pDialog.setCancelable(false);
-                        pDialog.show();
+
+                        Intent out = new Intent();
+                        out.putExtra(ScanConstants.SAVE_PDF, Boolean.TRUE);
+                        setResult(RESULT_OK, out);
+                        finish();
                         return null;
                     }
                 } catch (Exception e) {
@@ -370,6 +362,16 @@ public class MultiPageActivity extends AppCompatActivity {
 
             final String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
             stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
+
+            if (ScanConstants.Skip){
+                File fLast = stagingFiles.get(stagingFiles.size()-1);
+                fLast.delete();
+                stagingFiles.remove(stagingFiles.size()-1);
+                ScanConstants.Skip=false;
+            }
+            /*for (File _file: stagingFiles) {
+
+            }*/
 
             registerDataSetObserver(new DataSetObserver() {
                 @Override

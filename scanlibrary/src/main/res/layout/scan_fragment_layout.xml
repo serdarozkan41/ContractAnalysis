@@ -27,7 +27,7 @@
         android:background="@drawable/capsule_bg"
         android:orientation="horizontal"
         android:padding="@dimen/bottom_bar_padding"
-        android:text="@string/scan"
+        android:text="Kes"
         android:fontFamily="@font/font_regular"
         android:textFontWeight="600"
         android:textAllCaps="false"
