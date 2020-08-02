@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -75,7 +76,7 @@ public class ResultFragment extends Fragment {
         showProgressDialog(getResources().getString(R.string.loading));
         Bitmap bitmap = getBitmap();
         bitmap = ConvertGray(bitmap);
-        final Bitmap ORJ_bitmap =bitmap;
+        final Bitmap ORJ_bitmap = bitmap;
         scannedImageView = view.findViewById(R.id.scannedImage);
         setScannedImage(bitmap);
         doneButton = (Button) view.findViewById(R.id.doneButton);
@@ -106,7 +107,7 @@ public class ResultFragment extends Fragment {
         //setScannedImage(cutBitmap);
         Form selectedForm = ScanConstants.Selected_Form;
         Log.e("SONUÇ: ", selectedForm.getName());
-        if (selectedForm.getHasBarcode().equals("1")) {
+
             try {
                 Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
 
@@ -145,10 +146,9 @@ public class ResultFragment extends Fragment {
             } catch (Exception ex) {
                 dismissDialog();
                 Warning();
+                Log.e("BARCODE ARAMIYORUM: ", selectedForm.getHasBarcode());
             }
-        } else {
-            Log.e("BARCODE ARAMIYORUM: ", selectedForm.getHasBarcode());
-        }
+
         dismissDialog();
     }
 
@@ -169,11 +169,35 @@ public class ResultFragment extends Fragment {
                         if (barcodes.size() == 0) {
                             Warning();
                         } else {
-                            for (Barcode qr : barcodes) {
-                                Rect r = qr.getBoundingBox();
+                            Bitmap tempBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
 
-                                Log.e("KOD: "+qr.getDisplayValue()+", KONUM: ", String.valueOf(qr.getBoundingBox()));
+                            for (Barcode qr : barcodes) {
+                                Log.e("KOD: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
+
+                                Canvas canvas = new Canvas(tempBitmap);
+                                Paint p = new Paint();
+                                p.setStyle(Paint.Style.STROKE);
+                                p.setAntiAlias(true);
+                                p.setFilterBitmap(true);
+                                p.setDither(true);
+                                p.setColor(Color.RED);
+
+                                Paint p2 = new Paint();
+                                p2.setStyle(Paint.Style.STROKE);
+                                p2.setAntiAlias(true);
+                                p2.setFilterBitmap(true);
+                                p2.setDither(true);
+                                p2.setColor(Color.GREEN);
+
+                                Rect r = new Rect(qr.getBoundingBox().left,qr.getBoundingBox().top-qr.getBoundingBox().height(),qr.getBoundingBox().right,qr.getBoundingBox().bottom);
+                                r.set(r.left-r.top/2,r.top,r.right+r.top/2,r.bottom);
+                                canvas.drawRect(r,p);
+
+                                Point[] ps = qr.getCornerPoints();
+                                //canvas.drawLine(ps[0].x,ps[0].y,ps[1].x,ps[1].y,p2);
+
                             }
+                            setScannedImage(tempBitmap);
 
                         }
                     }
@@ -311,7 +335,7 @@ public class ResultFragment extends Fragment {
 
                     data.putExtra(ScanConstants.SCANNED_RESULT, uri);
 
-                    if(ScanConstants.Skip==false) {
+                    if (ScanConstants.Skip == false) {
                         BitmapTransporter bitmapTransporter = new BitmapTransporter();
                         bitmapTransporter.BitmapPath = uri;
                         bitmapTransporter.QrValue = foundedQR;

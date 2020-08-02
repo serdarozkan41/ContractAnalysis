@@ -17,6 +17,7 @@ import com.teesteknoloji.contractanalysis.R;
 import com.teesteknoloji.contractanalysis.models.AuthRequestModel;
 import com.teesteknoloji.contractanalysis.models.AuthResponseModel;
 import com.teesteknoloji.contractanalysis.utils.Constants;
+import com.teesteknoloji.contractanalysis.utils.PermissionUtil;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         LoadingBarInit();
-
+        PermissionUtil.ask(this);
         BuLogin = findViewById(R.id.BuLogin);
         TbPhone = findViewById(R.id.TbPhoneNumber);
 

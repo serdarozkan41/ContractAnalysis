@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         StartButton.setEnabled(false);
         LoadingBarInit();
 
-        PermissionUtil.ask(this);
+
         Constants.StartLoadingAnim(doubleBounce, progressOverlay);
         final String baseStorageDirectory = getApplicationContext().getString(R.string.base_storage_path);
         FileIOUtils.mkdir(baseStorageDirectory);

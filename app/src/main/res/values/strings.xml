@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Sözleşme Analiz</string>
-    <string name="base_storage_path">ContactAnalysis/data/</string>
-    <string name="base_staging_path">ContactAnalysis/stage/</string>
+    <string name="base_storage_path">ContractAnalysis/data/</string>
+    <string name="base_staging_path">ContractAnalysis/stage/</string>
     <string name="search_hint">Search Documents</string>
 
     <string name="scan_shortcut_short_label">Yeni Döküman</string>
