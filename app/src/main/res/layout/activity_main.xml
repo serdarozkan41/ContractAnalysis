@@ -31,7 +31,7 @@
     <EditText
         android:id="@+id/TbContractNumber"
         android:layout_width="0dp"
-        android:layout_height="45dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
@@ -49,12 +49,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DbScanForms" />
+        app:layout_constraintTop_toBottomOf="@+id/DbFormTypes" />
 
     <com.jaredrummler.materialspinner.MaterialSpinner
         android:id="@+id/DbProducts"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="50dp"
 
@@ -74,7 +74,7 @@
     <com.jaredrummler.materialspinner.MaterialSpinner
         android:id="@+id/DbCampaings"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
 
         android:layout_marginStart="32dp"
         android:layout_marginTop="24dp"
@@ -95,7 +95,7 @@
     <com.jaredrummler.materialspinner.MaterialSpinner
         android:id="@+id/DbFormTypes"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
@@ -109,26 +109,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/DbCampaings"
         app:ms_hint="Form Tipi Seçiniz"
-        app:ms_hint_color="@color/bottom_background_color"
-        tools:ignore="MissingConstraints" />
-
-    <com.jaredrummler.materialspinner.MaterialSpinner
-        android:id="@+id/DbScanForms"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="32dp"
-        android:elevation="1dp"
-        android:fontFamily="@font/font_regular"
-        android:shadowColor="@color/appRed"
-        android:textColor="@android:color/black"
-        android:textFontWeight="600"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DbFormTypes"
-        app:ms_hint="Form Seçiniz"
         app:ms_hint_color="@color/bottom_background_color"
         tools:ignore="MissingConstraints" />
 

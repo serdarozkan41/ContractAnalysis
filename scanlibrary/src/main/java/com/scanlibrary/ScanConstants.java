@@ -1,7 +1,11 @@
 package com.scanlibrary;
 
+import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
+
+import com.scanlibrary.models.Form;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,5 +29,9 @@ public class ScanConstants {
     public final static String SELECTED_BITMAP = "selectedBitmap";
     public final static String SCAN_MORE = "scanMore";
     public final static String SAVE_PDF = "savePdf";
+    public static Form Selected_Form = null;
+    public static boolean Skip=false;
+    public static String CNo="";
+    //public final static
 }
 

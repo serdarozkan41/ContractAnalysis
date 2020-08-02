@@ -1,7 +1,11 @@
 package com.teesteknoloji.contractanalysis.services;
 
+import com.pixplicity.easyprefs.library.Prefs;
+import com.scanlibrary.models.SendFormRequestModel;
 import com.teesteknoloji.contractanalysis.models.AuthRequestModel;
 import com.teesteknoloji.contractanalysis.models.AuthResponseModel;
+import com.teesteknoloji.contractanalysis.models.MenuResponseModel;
+import com.teesteknoloji.contractanalysis.models.SendResponseModel;
 import com.teesteknoloji.contractanalysis.utils.Constants;
 
 import retrofit2.Call;
@@ -35,4 +39,14 @@ public class ApiManager {
         authCall.enqueue(callback);
     }
 
+    public void GetMenus(long BayiId, long UserId, Callback<MenuResponseModel> callback){
+        String tokenString = "Bearer "+ Prefs.getString("Token","");
+        Call<MenuResponseModel> menuCall = service.getMenus(BayiId,UserId, tokenString);
+        menuCall.enqueue(callback);
+    }
+
+    public void SendForm(SendFormRequestModel sendRequestModel, Callback<SendResponseModel> callback){
+        Call<SendResponseModel> sendRequestModelCallback = service.SendForm(sendRequestModel);
+        sendRequestModelCallback.enqueue(callback);
+    }
 }

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,6 +27,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
+import android.os.StrictMode;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
@@ -38,10 +41,14 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.developer.kalert.KAlertDialog;
+import com.github.ybq.android.spinkit.style.CubeGrid;
+import com.google.gson.Gson;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.NotFoundException;
@@ -49,8 +56,12 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+import com.scanlibrary.ProgressDialogFragment;
+import com.scanlibrary.models.Image;
+import com.scanlibrary.models.SendFormRequestModel;
 import com.teesteknoloji.contractanalysis.R;
 import com.teesteknoloji.contractanalysis.models.BitmapTransporter;
+import com.teesteknoloji.contractanalysis.utils.Constants;
 import com.teesteknoloji.contractanalysis.utils.FileIOUtils;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
@@ -61,11 +72,20 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
 public class MultiPageActivity extends AppCompatActivity {
+    ProgressBar progressBar;
+    CubeGrid doubleBounce;
+    View progressOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +93,7 @@ public class MultiPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_multi_page);
 
         setTitle(getResources().getString(R.string.multi_page_title));
-
+        LoadingBarInit();
         final String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
         final List<File> stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
 
@@ -91,6 +111,13 @@ public class MultiPageActivity extends AppCompatActivity {
 
 
         setMargins(pagesGridView, 20, 20 + getStatusBarHeight(), 20, 20);
+    }
+
+    private void LoadingBarInit() {
+        progressOverlay = findViewById(R.id.progress_overlay);
+        progressBar = findViewById(R.id.PBar_Loading);
+        doubleBounce = new CubeGrid();
+        progressBar.setIndeterminateDrawable(doubleBounce);
     }
 
     private void setMargins(View view, int left, int top, int right, int bottom) {
@@ -116,24 +143,183 @@ public class MultiPageActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        try {
+            Intent out = new Intent();
+            out.putExtra(ScanConstants.SCANNED_RESULT, data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT));
+            out.putExtra(ScanConstants.SCAN_MORE, data.getExtras().getBoolean(ScanConstants.SCAN_MORE));
 
-        Intent out = new Intent();
-        out.putExtra(ScanConstants.SCANNED_RESULT, data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT));
-        out.putExtra(ScanConstants.SCAN_MORE, data.getExtras().getBoolean(ScanConstants.SCAN_MORE));
+            setResult(RESULT_OK, out);
+            finish();
 
-        setResult(RESULT_OK, out);
-        finish();
-
-        System.gc();
+            System.gc();
+        } catch (Exception ex) {
+        }
     }
 
     public void saveNow(View view) {
+        Constants.StartLoadingAnim(doubleBounce, progressOverlay);
+        showProgressDialog(getResources().getString(com.scanlibrary.R.string.loading));
+        try {
+            requestUploadSurvey();
+        } catch (IOException e) {
+
+        }
         Intent out = new Intent();
         out.putExtra(ScanConstants.SAVE_PDF, Boolean.TRUE);
         setResult(RESULT_OK, out);
         finish();
-        Toast.makeText(this, "Sunucuya Kaydedildi.", Toast.LENGTH_LONG).show();
     }
+
+    private final OkHttpClient httpClient = new OkHttpClient();
+    List<Image> qrList = new ArrayList<>();
+    private static ProgressDialogFragment progressDialogFragment;
+
+    public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+        byte[] byteFormat = stream.toByteArray();
+        // get the base 64 string
+        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
+
+        return imgString;
+    }
+
+    private void requestUploadSurvey() throws IOException {
+        Constants.StartLoadingAnim(doubleBounce, progressOverlay);
+        showProgressDialog(getResources().getString(com.scanlibrary.R.string.loading));
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
+        SendFormRequestModel requestModel = new SendFormRequestModel();
+
+        qrList = new ArrayList<>();
+        for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
+            Image im = new Image();
+            im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
+
+            Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
+            final File sd = Environment.getExternalStorageDirectory();
+            File src = new File(sd, ir.getPath());
+            Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
+            im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
+            //im.setImageBase64("asd");
+            qrList.add(im);
+        }
+        requestModel.setImages(qrList);
+
+        requestModel.setFormDetail(ScanConstants.Selected_Form);
+        requestModel.setCNo(ScanConstants.CNo);
+        Gson gson = new Gson();
+        String json = gson.toJson(requestModel);
+        URL url = new URL(Constants.BASE_URL + "Form/SendForm");
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                json);
+        final Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "OkHttp Bot")
+                .post(body)
+                .build();
+
+        AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                try {
+                    okhttp3.Response response = httpClient.newCall(request).execute();
+                    if (response.isSuccessful()) {
+                        dismissDialog();
+                        KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.SUCCESS_TYPE);
+                        pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                        pDialog.setTitleText("Sonuç");
+                        pDialog.setContentText("Başarı ile kaydedildi.");
+                        pDialog.setConfirmText("Tamam");
+                        pDialog.setCancelable(false);
+                        pDialog.show();
+                        return response.body().string();
+                    } else {
+                        dismissDialog();
+                        KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.WARNING_TYPE);
+                        pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                        pDialog.setTitleText("Sonuç");
+                        pDialog.setContentText("Bir sorun oluştu.");
+                        pDialog.setConfirmText("Tamam");
+                        pDialog.setCancelable(false);
+                        pDialog.show();
+                        return null;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                if (s != null) {
+
+                }
+            }
+        };
+
+        asyncTask.execute();
+
+       /* try (okhttp3.Response response = httpClient.newCall(request).execute()) {
+
+            if (response.isSuccessful()) {
+                dismissDialog();
+                KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.SUCCESS_TYPE);
+                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                pDialog.setTitleText("Sonuç");
+                pDialog.setContentText("Başarı ile kaydedildi.");
+                pDialog.setConfirmText("Tamam");
+                pDialog.setCancelable(false);
+                pDialog.show();
+            } else {
+                dismissDialog();
+                KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.WARNING_TYPE);
+                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                pDialog.setTitleText("Sonuç");
+                pDialog.setContentText("Bir sorun oluştu.");
+                pDialog.setConfirmText("Tamam");
+                pDialog.setCancelable(false);
+                pDialog.show();
+            }
+
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+            // Get response body
+            System.out.println(response.body().string());*/
+    }
+           /*MainApplication.apiManager.SendForm(requestModel, new Callback<SendResponseModel>() {
+                @Override
+                public void onResponse(Call<SendResponseModel> call, Response<SendResponseModel> response) {
+                    Log.e("SONUC 200:", String.valueOf(response.isSuccessful()));
+                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
+                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
+                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                    pDialog.setTitleText("Sonuç");
+                    pDialog.setContentText("Başarı ile kaydedildi.");
+                    pDialog.setConfirmText("Tamam");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+                }
+
+                @Override
+                public void onFailure(Call<SendResponseModel> call, Throwable t) {
+                    Log.e("SONUC 500: ", t.getMessage());
+                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
+                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.WARNING_TYPE);
+                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                    pDialog.setTitleText("Sonuç");
+                    pDialog.setContentText("Bir sorun oluştu.");
+                    pDialog.setConfirmText("Tamam");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+                }
+            });*/
+
 
     public void scanMore(View view) {
         Intent intent = new Intent(this, ScanActivity.class);
@@ -141,6 +327,21 @@ public class MultiPageActivity extends AppCompatActivity {
 
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
         startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE, options.toBundle());
+    }
+
+    protected synchronized void showProgressDialog(String message) {
+        if (progressDialogFragment != null && progressDialogFragment.isVisible()) {
+            // Before creating another loading dialog, close all opened loading dialogs (if any)
+            progressDialogFragment.dismissAllowingStateLoss();
+        }
+        progressDialogFragment = null;
+        progressDialogFragment = new ProgressDialogFragment(message);
+        FragmentManager fm = getFragmentManager();
+        progressDialogFragment.show(fm, ProgressDialogFragment.class.toString());
+    }
+
+    protected synchronized void dismissDialog() {
+        progressDialogFragment.dismissAllowingStateLoss();
     }
 
     public void showImage(List<File> stagingFiles, int position, View view) {
@@ -211,6 +412,7 @@ public class MultiPageActivity extends AppCompatActivity {
                 eachFileView.setLayoutParams(new GridView.LayoutParams(width, height));
 
                 ImageView deleteButton = eachFileView.findViewById(R.id.each_file_delete);
+
                 deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -229,31 +431,11 @@ public class MultiPageActivity extends AppCompatActivity {
                 imageView.setImageBitmap(myBitmap);
 
 
-
-                    TextView textView = eachFileView.findViewById(R.id.each_pageno);
-                    textView.setText("Sayfa " + (stagingFiles.size() - position + 1));
-
+                TextView textView = eachFileView.findViewById(R.id.each_pageno);
+                textView.setText("Sayfa " + (stagingFiles.size() - position + 1));
 
 
                 return eachFileView;
-            }
-        }
-
-        private Result[] detectBarCode(Bitmap bitmap) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
-            bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-            LuminanceSource source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
-            //Reader reader = new QRCodeReader();
-            QRCodeMultiReader reader = new QRCodeMultiReader();
-
-            try {
-                Result[] result = reader.decodeMultiple(new BinaryBitmap(new HybridBinarizer(source)));
-                return result;
-            } catch (NotFoundException e) {
-                e.printStackTrace();
-                return null;
             }
         }
     }

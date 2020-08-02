@@ -1,6 +1,7 @@
 package com.scanlibrary;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -14,18 +15,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.SyncStateContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.transition.Explode;
 
 import com.developer.kalert.KAlertDialog;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -33,7 +32,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.zxing.BinaryBitmap;
@@ -44,15 +42,17 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Reader;
 import com.google.zxing.Result;
+import com.google.zxing.client.android.Intents;
 import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.multi.qrcode.QRCodeMultiReader;
 import com.google.zxing.qrcode.QRCodeReader;
+import com.scanlibrary.models.Form;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+
+import okhttp3.MultipartBody;
 
 /**
  * Created by jhansi on 29/03/15.
@@ -101,7 +101,9 @@ public class ResultFragment extends Fragment {
             pageNumber.setText("1");
         }
 
-
+        addButton.setText("Tara");
+        SkipMood = false;
+        ScanConstants.Skip=false;
         Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
         Canvas canvas = new Canvas(cutBitmap);
         Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
@@ -109,48 +111,51 @@ public class ResultFragment extends Fragment {
         canvas.drawBitmap(bitmap, srcRect, desRect, null);
 
         //setScannedImage(cutBitmap);
-        try {
-          /*  String a = detectBarCode(cutBitmap);
-            Log.e("SONUC XİNG: ", a);
-            pageNumber.setText(a);*/
+        Form selectedForm = ScanConstants.Selected_Form;
+        Log.e("SONUÇ: ", selectedForm.getName());
+        if (selectedForm.getHasBarcode().equals("1")) {
+            try {
+                Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
 
+                InputImage image = InputImage.fromBitmap(cutBitmap, 1);
 
-            InputImage image = InputImage.fromBitmap(cutBitmap, 1);
+                BarcodeScanner scanner = BarcodeScanning.getClient();
 
-            BarcodeScanner scanner = BarcodeScanning.getClient();
-
-
-            Task<List<Barcode>> result = scanner.process(image)
-                    .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                        @Override
-                        public void onSuccess(List<Barcode> barcodes) {
-                            if (barcodes.size()==0){
+                Task<List<Barcode>> result = scanner.process(image)
+                        .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                            @Override
+                            public void onSuccess(List<Barcode> barcodes) {
+                                if (barcodes.size() == 0) {
+                                    Warning();
+                                } else {
+                                    Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
+                                    foundedQR = barcodes.get(0).getDisplayValue();
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("SONUC Google: ", e.getMessage());
                                 Warning();
-                                getFragmentManager().popBackStack();
                             }
-                            else{
-                            Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
-                            foundedQR = barcodes.get(0).getDisplayValue();
-                            }
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e("SONUC Google: ", e.getMessage());
-                        }
-                    });
+                        });
 
-            dismissDialog();
+                dismissDialog();
 
-        } catch (Exception ex) {
-            dismissDialog();
-            Warning();
-            getFragmentManager().popBackStack();
+            } catch (Exception ex) {
+                dismissDialog();
+                Warning();
+            }
+        } else {
+            Log.e("BARCODE ARAMIYORUM: ", selectedForm.getHasBarcode());
         }
+        dismissDialog();
     }
 
-    private void  Warning(){
+    boolean SkipMood = false;
+
+    private void Warning() {
         KAlertDialog pDialog = new KAlertDialog(getActivity(), KAlertDialog.ERROR_TYPE);
         pDialog.getProgressHelper().setBarColor(R.color.appRed);
         pDialog.setTitleText("Uyarı");
@@ -158,7 +163,9 @@ public class ResultFragment extends Fragment {
         pDialog.setConfirmText("Tamam");
         pDialog.setCancelable(false);
         pDialog.show();
-        getFragmentManager().popBackStack();
+        //getFragmentManager().popBackStack();
+        addButton.setText("Tekrar Çek");
+        ScanConstants.Skip=true;
     }
 
     private Bitmap ConvertGray(Bitmap bmpOriginal) {
@@ -197,30 +204,6 @@ public class ResultFragment extends Fragment {
         return null;
     }
 
-    final String detectBarCode(Bitmap bitmap) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
-        bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-        LuminanceSource source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
-        Reader reader = new QRCodeReader();
-        //QRCodeMultiReader reader = new QRCodeMultiReader();
-
-        try {
-            Result result = reader.decode(new BinaryBitmap(new HybridBinarizer(source)));
-            return result.getText();
-        } catch (NotFoundException e) {
-            e.printStackTrace();
-            return "";
-        } catch (FormatException e) {
-            e.printStackTrace();
-            return "";
-        } catch (ChecksumException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
     private Uri getUri() {
         Uri uri = getArguments().getParcelable(ScanConstants.SCANNED_RESULT);
         return uri;
@@ -256,6 +239,9 @@ public class ResultFragment extends Fragment {
                                 getActivity().finish();
                             }
                         });
+
+                        dismissDialog();
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -268,12 +254,13 @@ public class ResultFragment extends Fragment {
         @Override
         public void onClick(View v) {
             showProgressDialog(getResources().getString(R.string.loading));
-            GoMultiPage();
+                GoMultiPage();
 
         }
     }
 
-    String foundedQR="";
+    String foundedQR = "";
+
     private void GoMultiPage() {
         AsyncTask.execute(new Runnable() {
             @Override
@@ -285,11 +272,13 @@ public class ResultFragment extends Fragment {
                         bitmap = original;
                     }
                     Uri uri = Utils.getUri(getActivity(), bitmap);
-                    data.putExtra(ScanConstants.SCANNED_QR,foundedQR);
+
+                    data.putExtra(ScanConstants.SCANNED_QR, foundedQR);
+
                     data.putExtra(ScanConstants.SCANNED_RESULT, uri);
 
                     BitmapTransporter bitmapTransporter = new BitmapTransporter();
-                    bitmapTransporter.BitmapPath= uri;
+                    bitmapTransporter.BitmapPath = uri;
                     bitmapTransporter.QrValue = foundedQR;
                     ScanConstants.bitmapTransporterList.add(bitmapTransporter);
 
@@ -310,120 +299,6 @@ public class ResultFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private class BWButtonClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(final View v) {
-            showProgressDialog(getResources().getString(R.string.applying_filter));
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        transformed = ((ScanActivity) getActivity()).getBWBitmap(original);
-                    } catch (final OutOfMemoryError e) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                transformed = original;
-                                scannedImageView.setImageBitmap(original);
-                                e.printStackTrace();
-                                dismissDialog();
-                                onClick(v);
-                            }
-                        });
-                    }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            scannedImageView.setImageBitmap(transformed);
-                            dismissDialog();
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    private class MagicColorButtonClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(final View v) {
-            showProgressDialog(getResources().getString(R.string.applying_filter));
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        transformed = ((ScanActivity) getActivity()).getMagicColorBitmap(original);
-                    } catch (final OutOfMemoryError e) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                transformed = original;
-                                scannedImageView.setImageBitmap(original);
-                                e.printStackTrace();
-                                dismissDialog();
-                                onClick(v);
-                            }
-                        });
-                    }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            scannedImageView.setImageBitmap(transformed);
-                            dismissDialog();
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    private class OriginalButtonClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            try {
-                showProgressDialog(getResources().getString(R.string.applying_filter));
-                transformed = original;
-                scannedImageView.setImageBitmap(original);
-                dismissDialog();
-            } catch (OutOfMemoryError e) {
-                e.printStackTrace();
-                dismissDialog();
-            }
-        }
-    }
-
-    private class GrayButtonClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(final View v) {
-            showProgressDialog(getResources().getString(R.string.applying_filter));
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        transformed = ((ScanActivity) getActivity()).getGrayBitmap(original);
-                    } catch (final OutOfMemoryError e) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                transformed = original;
-                                scannedImageView.setImageBitmap(original);
-                                e.printStackTrace();
-                                dismissDialog();
-                                onClick(v);
-                            }
-                        });
-                    }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            scannedImageView.setImageBitmap(transformed);
-                            dismissDialog();
-                        }
-                    });
-                }
-            });
-        }
     }
 
     protected synchronized void showProgressDialog(String message) {
