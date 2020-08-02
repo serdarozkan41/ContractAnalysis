@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "333472617425",
+    "firebase_url": "https://contract-analysis-7687e.firebaseio.com",
+    "project_id": "contract-analysis-7687e",
+    "storage_bucket": "contract-analysis-7687e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333472617425:android:1e1dcdd99be86fbbe186f0",
+        "android_client_info": {
+          "package_name": "com.teesteknoloji.contractanalysis"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333472617425-q06uu9pd9kvt5gl0jnvje10102no4lv7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwYSBQRrsN4X7vbx98lByLQp2Uhsn2Iy0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333472617425-q06uu9pd9kvt5gl0jnvje10102no4lv7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
