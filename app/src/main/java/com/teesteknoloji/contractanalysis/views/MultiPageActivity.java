@@ -189,13 +189,18 @@ public class MultiPageActivity extends AppCompatActivity {
         for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
             Image im = new Image();
             im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
-
-            Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
-            final File sd = Environment.getExternalStorageDirectory();
-            File src = new File(sd, ir.getPath());
-            Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
-            im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
-            //im.setImageBase64("asd");
+            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("2041")) {
+                im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
+            } else if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("2042")) {
+                im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
+            } else {
+                Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
+                final File sd = Environment.getExternalStorageDirectory();
+                File src = new File(sd, ir.getPath());
+                Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
+                im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
+                //im.setImageBase64("asd");
+            }
             qrList.add(im);
         }
         requestModel.setImages(qrList);

@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.SyncStateContract;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -108,46 +109,48 @@ public class ResultFragment extends Fragment {
         Form selectedForm = ScanConstants.Selected_Form;
         Log.e("SONUÇ: ", selectedForm.getName());
 
-            try {
-                Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
+        try {
+            Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
 
-                InputImage image = InputImage.fromBitmap(cutBitmap, 1);
+            InputImage image = InputImage.fromBitmap(cutBitmap, 1);
 
-                BarcodeScanner scanner = BarcodeScanning.getClient();
+            BarcodeScanner scanner = BarcodeScanning.getClient();
 
-                Task<List<Barcode>> result = scanner.process(image)
-                        .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                            @Override
-                            public void onSuccess(List<Barcode> barcodes) {
-                                if (barcodes.size() == 0) {
-                                    Warning();
-                                } else {
-                                    Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
-                                    foundedQR = barcodes.get(0).getDisplayValue();
-                                    String pageType = foundedQR.substring(0, 1);
-                                    if (pageType.equals("2")) {
-                                        Log.e("Sayfada Imza Aramam Lazım ", String.valueOf(barcodes.size()));
-                                        //CutSign(ORJ_bitmap);
-                                    }
-
-                                }
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("SONUC Google: ", e.getMessage());
+            Task<List<Barcode>> result = scanner.process(image)
+                    .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                        @Override
+                        public void onSuccess(List<Barcode> barcodes) {
+                            if (barcodes.size() == 0) {
                                 Warning();
+                            } else {
+                                Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
+                                foundedQR = barcodes.get(0).getDisplayValue();
+                                String pageType = foundedQR.substring(0, 1);
+                                if (pageType.equals("2")) {
+                                    for (Barcode qr : barcodes) {
+                                        Log.e("KOD: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
+                                    }
+                                    CutSign(ORJ_bitmap);
+                                }
+
                             }
-                        });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("SONUC Google: ", e.getMessage());
+                            Warning();
+                        }
+                    });
 
-                dismissDialog();
+            dismissDialog();
 
-            } catch (Exception ex) {
-                dismissDialog();
-                Warning();
-                Log.e("BARCODE ARAMIYORUM: ", selectedForm.getHasBarcode());
-            }
+        } catch (Exception ex) {
+            dismissDialog();
+            Warning();
+            Log.e("BARCODE ARAMIYORUM: ", selectedForm.getHasBarcode());
+        }
 
         dismissDialog();
     }
@@ -168,37 +171,46 @@ public class ResultFragment extends Fragment {
                     public void onSuccess(List<Barcode> barcodes) {
                         if (barcodes.size() == 0) {
                             Warning();
+
                         } else {
                             Bitmap tempBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-
                             for (Barcode qr : barcodes) {
-                                Log.e("KOD: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
+                                Log.e("X: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
 
                                 Canvas canvas = new Canvas(tempBitmap);
+                                Rect r = new Rect(qr.getBoundingBox().left, qr.getBoundingBox().top - qr.getBoundingBox().height(), qr.getBoundingBox().right, qr.getBoundingBox().bottom);
+
                                 Paint p = new Paint();
                                 p.setStyle(Paint.Style.STROKE);
                                 p.setAntiAlias(true);
                                 p.setFilterBitmap(true);
                                 p.setDither(true);
                                 p.setColor(Color.RED);
-
                                 Paint p2 = new Paint();
                                 p2.setStyle(Paint.Style.STROKE);
                                 p2.setAntiAlias(true);
                                 p2.setFilterBitmap(true);
                                 p2.setDither(true);
                                 p2.setColor(Color.GREEN);
+                                r.set(r.left - r.top / 2, r.top, r.right + r.top / 2, r.bottom);
+                                //  Bitmap cutBitmap = Bitmap.createBitmap(r.width() + 10, r.height() + 10, Bitmap.Config.ARGB_8888);
+                                canvas.drawRect(r, p);
 
-                                Rect r = new Rect(qr.getBoundingBox().left,qr.getBoundingBox().top-qr.getBoundingBox().height(),qr.getBoundingBox().right,qr.getBoundingBox().bottom);
-                                r.set(r.left-r.top/2,r.top,r.right+r.top/2,r.bottom);
-                                canvas.drawRect(r,p);
+                               /*
 
-                                Point[] ps = qr.getCornerPoints();
-                                //canvas.drawLine(ps[0].x,ps[0].y,ps[1].x,ps[1].y,p2);
+                                //Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
+                                Canvas canvas = new Canvas(tempBitmap);
+                                //Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+                                Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
+                                canvas.drawBitmap(tempBitmap, srcRect, r, p);*/
 
+                                BitmapTransporter bt = new BitmapTransporter();
+                                bt.QrValue = qr.getDisplayValue();
+                                bt.B64Imza = getEncoded64ImageStringFromBitmap(tempBitmap);
+
+                                ScanConstants.bitmapTransporterList.add(bt);
                             }
                             setScannedImage(tempBitmap);
-
                         }
                     }
                 })
@@ -212,6 +224,22 @@ public class ResultFragment extends Fragment {
     }
 
     boolean SkipMood = false;
+
+    private Bitmap cropTest(Rect rect, Bitmap originalBmp) {
+        Log.e("SONUCLAR: ", rect.width() + "w-h " + rect.height() + " x/y" + rect.left + "-" + rect.top);
+        Bitmap croppedBmp = Bitmap.createBitmap(originalBmp, rect.left - 10, rect.top - 10, rect.width(), rect.height());
+        return croppedBmp;
+    }
+
+    public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+        byte[] byteFormat = stream.toByteArray();
+        // get the base 64 string
+        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
+
+        return imgString;
+    }
 
     private void Warning() {
         KAlertDialog pDialog = new KAlertDialog(getActivity(), KAlertDialog.ERROR_TYPE);
