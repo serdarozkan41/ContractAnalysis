@@ -189,9 +189,7 @@ public class MultiPageActivity extends AppCompatActivity {
         for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
             Image im = new Image();
             im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
-            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("2041")) {
-                im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
-            } else if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("2042")) {
+            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("IMZA")) {
                 im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
             } else {
                 Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
@@ -203,6 +201,7 @@ public class MultiPageActivity extends AppCompatActivity {
             }
             qrList.add(im);
         }
+        Log.e("LOG QR ADED: ", String.valueOf(qrList.size()));
         requestModel.setImages(qrList);
 
         requestModel.setFormDetail(ScanConstants.Selected_Form);

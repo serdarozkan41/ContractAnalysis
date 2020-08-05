@@ -242,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (TbContractNumber.getText().length() > 0) {
             scannedBitmaps.clear();
+            ScanConstants.bitmapTransporterList = new ArrayList<BitmapTransporter>();
             String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
             String scanningTmpDirectory = getApplicationContext().getString(R.string.base_scantmp_path);
 
@@ -431,9 +432,7 @@ public class MainActivity extends AppCompatActivity {
             Image im = new Image();
             im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
 
-            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("2041")) {
-                im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
-            } else if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("2042")) {
+            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("IMZA")) {
                 im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
             } else {
                 Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
