@@ -6,6 +6,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
@@ -130,7 +132,12 @@ public class ResultFragment extends Fragment {
                                     for (Barcode qr : barcodes) {
                                         Log.e("KOD: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
                                     }
-                                    CutSign(ORJ_bitmap);
+
+                                    String pNo = foundedQR.substring(8, 10);
+                                    Log.e("SAYFA Sayısı:", pNo);
+                                    if (pNo.equals("08")) {
+                                        CutSign(ORJ_bitmap);
+                                    }
                                 }
 
                             }
@@ -155,72 +162,31 @@ public class ResultFragment extends Fragment {
         dismissDialog();
     }
 
-    private void CutSign(final Bitmap bitmap) {
+    private void CutSign(Bitmap bitmap) {
 
-        InputImage image = InputImage.fromBitmap(bitmap, 1);
-        BarcodeScannerOptions options =
-                new BarcodeScannerOptions.Builder()
-                        .setBarcodeFormats(Barcode.FORMAT_CODE_128)
-                        .build();
+        Bitmap tempBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
+        double defaultX = 350;
+        double defaultY = 485;
+        double defaultWidht = 793;
+        double defaultHeight = 1140;
+        double defaultSignHeight = 120;
 
-        final BarcodeScanner scanner = BarcodeScanning.getClient(options);
+        double difX = defaultWidht / tempBitmap.getWidth();
+        double newX = (difX * defaultX) + defaultX;
 
-        Task<List<Barcode>> result = scanner.process(image)
-                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                    @Override
-                    public void onSuccess(List<Barcode> barcodes) {
-                        if (barcodes.size() == 0) {
-                            Warning();
+        double difY = defaultHeight / tempBitmap.getHeight();
+        double newY = (difY * defaultY) + defaultY;
 
-                        } else {
-                            Bitmap tempBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-                            for (Barcode qr : barcodes) {
-                                Log.e("X: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
+        double newWidth = (tempBitmap.getWidth() - newX) - 10;
+        double newHeight = (difY * defaultSignHeight) + defaultSignHeight;
 
-                                Canvas canvas = new Canvas(tempBitmap);
-                                Rect r = new Rect(qr.getBoundingBox().left, qr.getBoundingBox().top - qr.getBoundingBox().height(), qr.getBoundingBox().right, qr.getBoundingBox().bottom);
+        Bitmap newBitmap = Bitmap.createBitmap(tempBitmap, (int) newX, (int) newY, (int) newWidth, (int) newHeight);
+        Log.e("KONUMLAR: ", (int) newX + "-" + (int) newY + "/" + (int) newWidth + "-" + (int) newHeight);
+        BitmapTransporter bt = new BitmapTransporter();
+        bt.QrValue = "IMZA";
+        bt.B64Imza = getEncoded64ImageStringFromBitmap(newBitmap);
 
-                                Paint p = new Paint();
-                                p.setStyle(Paint.Style.STROKE);
-                                p.setAntiAlias(true);
-                                p.setFilterBitmap(true);
-                                p.setDither(true);
-                                p.setColor(Color.RED);
-                                Paint p2 = new Paint();
-                                p2.setStyle(Paint.Style.STROKE);
-                                p2.setAntiAlias(true);
-                                p2.setFilterBitmap(true);
-                                p2.setDither(true);
-                                p2.setColor(Color.GREEN);
-                                r.set(r.left - r.top / 2, r.top, r.right + r.top / 2, r.bottom);
-                                //  Bitmap cutBitmap = Bitmap.createBitmap(r.width() + 10, r.height() + 10, Bitmap.Config.ARGB_8888);
-                                canvas.drawRect(r, p);
-
-                               /*
-
-                                //Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
-                                Canvas canvas = new Canvas(tempBitmap);
-                                //Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
-                                Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
-                                canvas.drawBitmap(tempBitmap, srcRect, r, p);*/
-
-                                BitmapTransporter bt = new BitmapTransporter();
-                                bt.QrValue = qr.getDisplayValue();
-                                bt.B64Imza = getEncoded64ImageStringFromBitmap(tempBitmap);
-
-                                ScanConstants.bitmapTransporterList.add(bt);
-                            }
-                            setScannedImage(tempBitmap);
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("SONUC Google: ", e.getMessage());
-                        Warning();
-                    }
-                });
+        ScanConstants.bitmapTransporterList.add(bt);
     }
 
     boolean SkipMood = false;
