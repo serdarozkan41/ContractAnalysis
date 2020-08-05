@@ -25,7 +25,7 @@ public class ScanConstants {
     public final static String SCANNED_QR = "scannedQR";
     public final static String SCANNED_List = "scannedList";
     public final static String IMAGE_PATH = Environment.getExternalStorageDirectory().getPath() + "/ContractAnalysis/tmp";
-    public final static List<BitmapTransporter> bitmapTransporterList = new ArrayList<>();
+    public static List<BitmapTransporter> bitmapTransporterList = new ArrayList<>();
     public final static String SELECTED_BITMAP = "selectedBitmap";
     public final static String SCAN_MORE = "scanMore";
     public final static String SAVE_PDF = "savePdf";
