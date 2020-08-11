@@ -43,6 +43,8 @@ import com.google.mlkit.vision.common.InputImage;
 
 import com.scanlibrary.models.Form;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -57,11 +59,13 @@ public class ResultFragment extends Fragment {
 
     private View view;
     private ImageView scannedImageView;
+    private ImageView IvSign;
     private Button doneButton;
     private Button addButton;
     private Bitmap original;
     private Bitmap transformed;
     private TextView pageNumber;
+    private TextView LbQR;
     private static ProgressDialogFragment progressDialogFragment;
 
     public ResultFragment() {
@@ -81,12 +85,14 @@ public class ResultFragment extends Fragment {
         bitmap = ConvertGray(bitmap);
         final Bitmap ORJ_bitmap = bitmap;
         scannedImageView = view.findViewById(R.id.scannedImage);
+        IvSign = view.findViewById(R.id.IvSign);
         setScannedImage(bitmap);
         doneButton = (Button) view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new DoneButtonClickListener());
         addButton = (Button) view.findViewById(R.id.addBtn);
         addButton.setOnClickListener(new AddButtonClickListener());
         pageNumber = (TextView) view.findViewById(R.id.pageNumber);
+        LbQR = (TextView) view.findViewById(R.id.LbQr);
 
         final File sd = Environment.getExternalStorageDirectory();
         final String stagingDirPath = view.getContext().getString(R.string.base_staging_path);
@@ -128,15 +134,21 @@ public class ResultFragment extends Fragment {
                                 Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
                                 foundedQR = barcodes.get(0).getDisplayValue();
                                 String pageType = foundedQR.substring(0, 1);
+                                LbQR.setText(foundedQR);
                                 if (pageType.equals("2")) {
                                     for (Barcode qr : barcodes) {
                                         Log.e("KOD: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
                                     }
 
-                                    String pNo = foundedQR.substring(8, 10);
-                                    Log.e("SAYFA Sayısı:", pNo);
-                                    if (pNo.equals("08")) {
-                                        CutSign(ORJ_bitmap);
+                                    if(foundedQR.length()>4){
+                                        String pNo = foundedQR.substring(8, 10);
+                                        Log.e("SAYFA Sayısı:", pNo);
+                                        if (pNo.equals("08")) {
+                                            CutSign(ORJ_bitmap);
+                                        }
+                                    }
+                                    else {
+                                        Warning();
                                     }
                                 }
 
@@ -185,7 +197,7 @@ public class ResultFragment extends Fragment {
         BitmapTransporter bt = new BitmapTransporter();
         bt.QrValue = "IMZA";
         bt.B64Imza = getEncoded64ImageStringFromBitmap(newBitmap);
-
+        IvSign.setImageBitmap(newBitmap);
         ScanConstants.bitmapTransporterList.add(bt);
     }
 

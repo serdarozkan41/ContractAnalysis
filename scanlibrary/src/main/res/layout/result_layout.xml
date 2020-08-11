@@ -103,8 +103,26 @@
                 android:layout_gravity="center"
                 android:layout_margin="@dimen/scanPadding" />
 
+            <ImageView
+                android:id="@+id/IvSign"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="50dp"
+                android:layout_marginEnd="40dp" />
+
         </RelativeLayout>
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/LbQr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/addBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

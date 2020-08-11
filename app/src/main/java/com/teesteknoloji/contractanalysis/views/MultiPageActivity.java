@@ -227,6 +227,7 @@ public class MultiPageActivity extends AppCompatActivity {
             protected String doInBackground(Void... params) {
                 try {
                     okhttp3.Response response = httpClient.newCall(request).execute();
+                    Log.e("HATAAA", String.valueOf(response.body()));
                     if (response.isSuccessful()) {
                         dismissDialog();
 
