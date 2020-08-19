@@ -5,7 +5,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.scanlibrary.models.Campaign;
 import com.scanlibrary.models.Form;
+import com.scanlibrary.models.FormDetail;
+import com.scanlibrary.models.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +32,11 @@ public class ScanConstants {
     public final static String SELECTED_BITMAP = "selectedBitmap";
     public final static String SCAN_MORE = "scanMore";
     public final static String SAVE_PDF = "savePdf";
-    public static Form Selected_Form = null;
+    public static FormDetail Selected_Form = null;
     public static boolean Skip=false;
     public static String CNo="";
+    public static Product Selected_Product;
+    public static Campaign Selected_Campaing;
     //public final static
 }
 

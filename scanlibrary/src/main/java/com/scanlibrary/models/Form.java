@@ -1,114 +1,61 @@
+
 package com.scanlibrary.models;
 
+import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
+@SuppressWarnings("unused")
 public class Form {
 
-    @SerializedName("documentid")
-    private String mDocumentid;
-    @SerializedName("formType")
-    private String mFormType;
-    @SerializedName("hasBarcode")
-    private String mHasBarcode;
-    @SerializedName("id")
-    private String mId;
-    @SerializedName("name")
-    private String mName;
-    @SerializedName("page")
-    private List<Page> mPage;
-    @SerializedName("pageControl")
-    private String mPageControl;
-    @SerializedName("pageCount")
-    private String mPageCount;
-    @SerializedName("required")
-    private String mRequired;
-    @SerializedName("sigRegion")
-    private String mSigRegion;
+    @SerializedName("formBarcode")
+    private String mFormBarcode;
+    @SerializedName("formId")
+    private Long mFormId;
+    @SerializedName("formNo")
+    private String mFormNo;
+    @SerializedName("isControl")
+    private Boolean mIsControl;
+    @SerializedName("pages")
+    private List<Page> mPages;
 
-    public String getDocumentid() {
-        return mDocumentid;
+    public String getFormBarcode() {
+        return mFormBarcode;
     }
 
-    public void setDocumentid(String documentid) {
-        mDocumentid = documentid;
+    public void setFormBarcode(String formBarcode) {
+        mFormBarcode = formBarcode;
     }
 
-    public String getFormType() {
-        return mFormType;
+    public Long getFormId() {
+        return mFormId;
     }
 
-    public void setFormType(String formType) {
-        mFormType = formType;
+    public void setFormId(Long formId) {
+        mFormId = formId;
     }
 
-    public String getHasBarcode() {
-        return mHasBarcode;
+    public String getFormNo() {
+        return mFormNo;
     }
 
-    public void setHasBarcode(String hasBarcode) {
-        mHasBarcode = hasBarcode;
+    public void setFormNo(String formNo) {
+        mFormNo = formNo;
     }
 
-    public String getId() {
-        return mId;
+    public Boolean getIsControl() {
+        return mIsControl;
     }
 
-    public void setId(String id) {
-        mId = id;
+    public void setIsControl(Boolean isControl) {
+        mIsControl = isControl;
     }
 
-    public String getName() {
-        return mName;
+    public List<Page> getPages() {
+        return mPages;
     }
 
-    public void setName(String name) {
-        mName = name;
+    public void setPages(List<Page> pages) {
+        mPages = pages;
     }
 
-    public List<Page> getPage() {
-        return mPage;
-    }
-
-    public void setPage(List<Page> page) {
-        mPage = page;
-    }
-
-    public String getPageControl() {
-        return mPageControl;
-    }
-
-    public void setPageControl(String pageControl) {
-        mPageControl = pageControl;
-    }
-
-    public String getPageCount() {
-        return mPageCount;
-    }
-
-    public void setPageCount(String pageCount) {
-        mPageCount = pageCount;
-    }
-
-    public String getRequired() {
-        return mRequired;
-    }
-
-    public void setRequired(String required) {
-        mRequired = required;
-    }
-
-    public String getSigRegion() {
-        return mSigRegion;
-    }
-
-    public void setSigRegion(String sigRegion) {
-        mSigRegion = sigRegion;
-    }
-
-    @Override
-    public String toString() {
-        return mName;
-    }
 }

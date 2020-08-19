@@ -3,6 +3,7 @@ package com.teesteknoloji.contractanalysis.models;
 
 import java.util.List;
 import com.google.gson.annotations.SerializedName;
+import com.scanlibrary.models.Product;
 
 @SuppressWarnings("unused")
 public class MenuResponseModel {

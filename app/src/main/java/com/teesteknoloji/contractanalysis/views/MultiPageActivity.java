@@ -1,11 +1,8 @@
 package com.teesteknoloji.contractanalysis.views;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -15,38 +12,23 @@ import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
-import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.developer.kalert.KAlertDialog;
 import com.github.ybq.android.spinkit.style.CubeGrid;
 import com.google.gson.Gson;
 
@@ -55,21 +37,16 @@ import com.scanlibrary.ProgressDialogFragment;
 import com.scanlibrary.models.Image;
 import com.scanlibrary.models.SendFormRequestModel;
 import com.teesteknoloji.contractanalysis.R;
-import com.teesteknoloji.contractanalysis.models.BitmapTransporter;
 import com.teesteknoloji.contractanalysis.utils.Constants;
 import com.teesteknoloji.contractanalysis.utils.FileIOUtils;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
-import com.teesteknoloji.contractanalysis.utils.FileWritingCallback;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -185,7 +162,14 @@ public class MultiPageActivity extends AppCompatActivity {
         SendFormRequestModel requestModel = new SendFormRequestModel();
         final OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(120,TimeUnit.SECONDS).readTimeout(120,TimeUnit.SECONDS).writeTimeout(120,TimeUnit.SECONDS).build();
 
-        qrList = new ArrayList<>();
+        requestModel.setCampaingId(ScanConstants.Selected_Campaing.getId());
+        requestModel.setProductId(ScanConstants.Selected_Product.getId());
+        requestModel.setCNo(ScanConstants.CNo);
+        requestModel.setFormDetail(ScanConstants.Selected_Form);
+
+
+
+       /* qrList = new ArrayList<>();
         for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
             Image im = new Image();
             im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
@@ -260,63 +244,8 @@ public class MultiPageActivity extends AppCompatActivity {
             }
         };
 
-        asyncTask.execute();
-
-       /* try (okhttp3.Response response = httpClient.newCall(request).execute()) {
-
-            if (response.isSuccessful()) {
-                dismissDialog();
-                KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.SUCCESS_TYPE);
-                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                pDialog.setTitleText("Sonuç");
-                pDialog.setContentText("Başarı ile kaydedildi.");
-                pDialog.setConfirmText("Tamam");
-                pDialog.setCancelable(false);
-                pDialog.show();
-            } else {
-                dismissDialog();
-                KAlertDialog pDialog = new KAlertDialog(MultiPageActivity.this, KAlertDialog.WARNING_TYPE);
-                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                pDialog.setTitleText("Sonuç");
-                pDialog.setContentText("Bir sorun oluştu.");
-                pDialog.setConfirmText("Tamam");
-                pDialog.setCancelable(false);
-                pDialog.show();
-            }
-
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-            // Get response body
-            System.out.println(response.body().string());*/
+        asyncTask.execute();*/
     }
-           /*MainApplication.apiManager.SendForm(requestModel, new Callback<SendResponseModel>() {
-                @Override
-                public void onResponse(Call<SendResponseModel> call, Response<SendResponseModel> response) {
-                    Log.e("SONUC 200:", String.valueOf(response.isSuccessful()));
-                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
-                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
-                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                    pDialog.setTitleText("Sonuç");
-                    pDialog.setContentText("Başarı ile kaydedildi.");
-                    pDialog.setConfirmText("Tamam");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                }
-
-                @Override
-                public void onFailure(Call<SendResponseModel> call, Throwable t) {
-                    Log.e("SONUC 500: ", t.getMessage());
-                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
-                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.WARNING_TYPE);
-                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                    pDialog.setTitleText("Sonuç");
-                    pDialog.setContentText("Bir sorun oluştu.");
-                    pDialog.setConfirmText("Tamam");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                }
-            });*/
-
 
     public void scanMore(View view) {
         Intent intent = new Intent(this, ScanActivity.class);

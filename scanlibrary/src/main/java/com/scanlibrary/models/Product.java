@@ -1,16 +1,15 @@
+package com.scanlibrary.models;
 
-package com.teesteknoloji.contractanalysis.models;
-
-import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
-@SuppressWarnings("unused")
+import java.util.List;
+
 public class Product {
 
     @SerializedName("campaign")
     private List<Campaign> Campaign;
     @SerializedName("id")
-    private String Id;
+    private Long Id;
     @SerializedName("name")
     private String Name;
 
@@ -22,11 +21,11 @@ public class Product {
         Campaign = campaign;
     }
 
-    public String getId() {
+    public Long getId() {
         return Id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         Id = id;
     }
 

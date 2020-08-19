@@ -113,12 +113,8 @@ public class ResultFragment extends Fragment {
         Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
         canvas.drawBitmap(bitmap, srcRect, desRect, null);
 
-        //setScannedImage(cutBitmap);
-        Form selectedForm = ScanConstants.Selected_Form;
-        Log.e("SONUÇ: ", selectedForm.getName());
-
         try {
-            Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
+//            Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
 
             InputImage image = InputImage.fromBitmap(cutBitmap, 1);
 
@@ -168,7 +164,6 @@ public class ResultFragment extends Fragment {
         } catch (Exception ex) {
             dismissDialog();
             Warning();
-            Log.e("BARCODE ARAMIYORUM: ", selectedForm.getHasBarcode());
         }
 
         dismissDialog();

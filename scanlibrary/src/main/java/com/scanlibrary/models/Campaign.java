@@ -1,33 +1,31 @@
+package com.scanlibrary.models;
 
-package com.teesteknoloji.contractanalysis.models;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
-import com.scanlibrary.models.Form;
 
-@SuppressWarnings("unused")
 public class Campaign {
 
     @SerializedName("form")
-    private List<Form> Form;
+    private List<FormDetail> Form;
     @SerializedName("id")
-    private String Id;
+    private Long Id;
     @SerializedName("name")
     private String Name;
 
-    public List<Form> getForm() {
+    public List<FormDetail> getForm() {
         return Form;
     }
 
-    public void setForm(List<Form> form) {
+    public void setForm(List<FormDetail> form) {
         Form = form;
     }
 
-    public String getId() {
+    public Long getId() {
         return Id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         Id = id;
     }
 

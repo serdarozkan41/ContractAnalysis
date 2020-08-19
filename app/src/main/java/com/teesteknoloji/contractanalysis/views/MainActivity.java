@@ -31,15 +31,15 @@ import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinnerAdapter;
 import com.pixplicity.easyprefs.library.Prefs;
 import com.scanlibrary.BitmapTransporter;
+import com.scanlibrary.models.Campaign;
 import com.scanlibrary.models.Form;
+import com.scanlibrary.models.FormDetail;
 import com.scanlibrary.models.Image;
+import com.scanlibrary.models.Product;
 import com.scanlibrary.models.SendFormRequestModel;
 import com.teesteknoloji.contractanalysis.MainApplication;
 import com.teesteknoloji.contractanalysis.R;
-import com.teesteknoloji.contractanalysis.models.Campaign;
 import com.teesteknoloji.contractanalysis.models.MenuResponseModel;
-import com.teesteknoloji.contractanalysis.models.Product;
-import com.teesteknoloji.contractanalysis.models.SendResponseModel;
 import com.teesteknoloji.contractanalysis.unuseds.SearchableActivity;
 import com.teesteknoloji.contractanalysis.unuseds.SettingsActivity;
 import com.teesteknoloji.contractanalysis.persistance.Document;
@@ -50,21 +50,16 @@ import com.teesteknoloji.contractanalysis.fileView.FLAdapter;
 import com.teesteknoloji.contractanalysis.utils.FileIOUtils;
 import com.teesteknoloji.contractanalysis.utils.FileWritingCallback;
 import com.teesteknoloji.contractanalysis.utils.PDFWriterUtil;
-import com.teesteknoloji.contractanalysis.utils.PermissionUtil;
 /*import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;*/
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     View progressOverlay;
     private ArrayAdapter<Product> productAdapter;
     private ArrayAdapter<Campaign> campaingAdapter;
-    private ArrayAdapter<Form> formTypeAdapter;
+    private ArrayAdapter<FormDetail> formTypeAdapter;
 
     LiveData<List<Document>> liveData;
 
@@ -99,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
     Button StartButton;
     private List<Product> ProductList;
     private List<Campaign> CampaingList;
-    private List<Form> FormTypeList;
-    Form selectedForm;
+    private List<FormDetail> FormTypeList;
+    FormDetail selectedForm;
 
     public MainActivity() {
 
@@ -193,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(MaterialSpinner view, int position, long id, Product item) {
                 CampaingList = new ArrayList<>();
+                ScanConstants.Selected_Product= item;
                 CampaingList = item.getCampaign();
                 campaingAdapter = new ArrayAdapter<Campaign>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, CampaingList);
                 MaterialSpinnerAdapter<Campaign> campaignMaterialSpinnerAdapter = new MaterialSpinnerAdapter<Campaign>(MainActivity.this, CampaingList);
@@ -204,18 +200,19 @@ public class MainActivity extends AppCompatActivity {
                     public void onItemSelected(MaterialSpinner view, int position, long id, Campaign item) {
                         FormTypeList = new ArrayList<>();
                         FormTypeList = item.getForm();
-                        formTypeAdapter = new ArrayAdapter<Form>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, FormTypeList);
-                        MaterialSpinnerAdapter<Form> formMaterialSpinnerAdapter = new MaterialSpinnerAdapter<Form>(MainActivity.this, FormTypeList);
+                        ScanConstants.Selected_Campaing = item;
+                        formTypeAdapter = new ArrayAdapter<FormDetail>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, FormTypeList);
+                        MaterialSpinnerAdapter<FormDetail> formMaterialSpinnerAdapter = new MaterialSpinnerAdapter<FormDetail>(MainActivity.this, FormTypeList);
                         DbFormTypes.setAdapter(formMaterialSpinnerAdapter);
                         DbFormTypes.setEnabled(true);
-                        DbFormTypes.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Form>() {
+                        DbFormTypes.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<FormDetail>() {
                             @Override
-                            public void onItemSelected(MaterialSpinner view, int position, long id, Form item) {
+                            public void onItemSelected(MaterialSpinner view, int position, long id, FormDetail item) {
                                 selectedForm = item;
+                                ScanConstants.Selected_Form = item;
                                 StartButton.setEnabled(true);
                             }
                         });
-
                     }
                 });
             }
@@ -251,7 +248,6 @@ public class MainActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, ScanActivity.class);
             intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA);
-            ScanConstants.Selected_Form = selectedForm;
             ScanConstants.CNo = TbContractNumber.getText().toString();
 
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
@@ -387,8 +383,6 @@ public class MainActivity extends AppCompatActivity {
                 final File sd = Environment.getExternalStorageDirectory();
                 File src = new File(sd, uri.getPath());
                 Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
-
-                //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 saveBitmap(bitmap, doScanMore);
 
                 if (doScanMore) {
@@ -398,123 +392,12 @@ public class MainActivity extends AppCompatActivity {
 
                     startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE);
                 }
-
-                //getContentResolver().delete(uri, null, null);
             }
 
             Constants.StopLoadingAnim(doubleBounce, progressOverlay);
         }
     }
 
-    List<Image> qrList = new ArrayList<>();
-
-    public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
-        byte[] byteFormat = stream.toByteArray();
-        // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
-
-        return imgString;
-    }
 
     private final OkHttpClient httpClient = new OkHttpClient();
-
-    private void requestUploadSurvey() throws IOException {
-        Constants.StartLoadingAnim(doubleBounce, progressOverlay);
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-        StrictMode.setThreadPolicy(policy);
-        SendFormRequestModel requestModel = new SendFormRequestModel();
-
-        qrList = new ArrayList<>();
-        for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
-            Image im = new Image();
-            im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
-
-            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("IMZA")) {
-                im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
-            } else {
-                Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
-                final File sd = Environment.getExternalStorageDirectory();
-                File src = new File(sd, ir.getPath());
-                Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
-                im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
-                //im.setImageBase64("asd");
-            }
-            qrList.add(im);
-        }
-        requestModel.setImages(qrList);
-
-        requestModel.setFormDetail(ScanConstants.Selected_Form);
-        requestModel.setCNo(ScanConstants.CNo);
-        Gson gson = new Gson();
-        String json = gson.toJson(requestModel);
-        URL url = new URL(Constants.BASE_URL + "Form/SendForm");
-
-        RequestBody body = RequestBody.create(
-                MediaType.parse("application/json; charset=utf-8"),
-                json);
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("User-Agent", "OkHttp Bot")
-                .post(body)
-                .build();
-
-        try (okhttp3.Response response = httpClient.newCall(request).execute()) {
-
-            if (response.isSuccessful()) {
-                Constants.StopLoadingAnim(doubleBounce, progressOverlay);
-                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
-                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                pDialog.setTitleText("Sonuç");
-                pDialog.setContentText("Başarı ile kaydedildi.");
-                pDialog.setConfirmText("Tamam");
-                pDialog.setCancelable(false);
-                pDialog.show();
-            } else {
-                Constants.StopLoadingAnim(doubleBounce, progressOverlay);
-                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.WARNING_TYPE);
-                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                pDialog.setTitleText("Sonuç");
-                pDialog.setContentText("Bir sorun oluştu.");
-                pDialog.setConfirmText("Tamam");
-                pDialog.setCancelable(false);
-                pDialog.show();
-            }
-
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-            // Get response body
-            System.out.println(response.body().string());
-        }
-           /*MainApplication.apiManager.SendForm(requestModel, new Callback<SendResponseModel>() {
-                @Override
-                public void onResponse(Call<SendResponseModel> call, Response<SendResponseModel> response) {
-                    Log.e("SONUC 200:", String.valueOf(response.isSuccessful()));
-                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
-                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
-                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                    pDialog.setTitleText("Sonuç");
-                    pDialog.setContentText("Başarı ile kaydedildi.");
-                    pDialog.setConfirmText("Tamam");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                }
-
-                @Override
-                public void onFailure(Call<SendResponseModel> call, Throwable t) {
-                    Log.e("SONUC 500: ", t.getMessage());
-                    Constants.StopLoadingAnim(doubleBounce,progressOverlay);
-                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.WARNING_TYPE);
-                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                    pDialog.setTitleText("Sonuç");
-                    pDialog.setContentText("Bir sorun oluştu.");
-                    pDialog.setConfirmText("Tamam");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
-                }
-            });*/
-    }
-
 }
