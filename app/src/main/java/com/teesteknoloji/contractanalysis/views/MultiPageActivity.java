@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -29,11 +31,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.developer.kalert.KAlertDialog;
 import com.github.ybq.android.spinkit.style.CubeGrid;
 import com.google.gson.Gson;
 
 import com.pixplicity.easyprefs.library.Prefs;
 import com.scanlibrary.ProgressDialogFragment;
+import com.scanlibrary.models.Form;
 import com.scanlibrary.models.Image;
 import com.scanlibrary.models.SendFormRequestModel;
 import com.teesteknoloji.contractanalysis.R;
@@ -59,6 +63,7 @@ public class MultiPageActivity extends AppCompatActivity {
     ProgressBar progressBar;
     CubeGrid doubleBounce;
     View progressOverlay;
+    List<File> stagingFiles = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +73,7 @@ public class MultiPageActivity extends AppCompatActivity {
         setTitle(getResources().getString(R.string.multi_page_title));
         LoadingBarInit();
         final String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
-        final List<File> stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
+        stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
 
         final GridView pagesGridView = (GridView) findViewById(R.id.multi_page_grid);
         final BaseAdapter gvAdapter = new ImageAdapterGridView(this);
@@ -84,6 +89,8 @@ public class MultiPageActivity extends AppCompatActivity {
 
 
         setMargins(pagesGridView, 20, 20 + getStatusBarHeight(), 20, 20);
+
+
     }
 
     private void LoadingBarInit() {
@@ -116,6 +123,7 @@ public class MultiPageActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         try {
             Intent out = new Intent();
             out.putExtra(ScanConstants.SCANNED_RESULT, data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT));
@@ -132,12 +140,6 @@ public class MultiPageActivity extends AppCompatActivity {
     public void saveNow(View view) {
         Constants.StartLoadingAnim(doubleBounce, progressOverlay);
         showProgressDialog(getResources().getString(com.scanlibrary.R.string.loading));
-        try {
-            requestUploadSurvey();
-        } catch (IOException e) {
-
-        }
-
     }
 
     List<Image> qrList = new ArrayList<>();
@@ -159,39 +161,11 @@ public class MultiPageActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
-        SendFormRequestModel requestModel = new SendFormRequestModel();
-        final OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(120,TimeUnit.SECONDS).readTimeout(120,TimeUnit.SECONDS).writeTimeout(120,TimeUnit.SECONDS).build();
-
-        requestModel.setCampaingId(ScanConstants.Selected_Campaing.getId());
-        requestModel.setProductId(ScanConstants.Selected_Product.getId());
-        requestModel.setCNo(ScanConstants.CNo);
-        requestModel.setFormDetail(ScanConstants.Selected_Form);
+        final OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS).build();
 
 
-
-       /* qrList = new ArrayList<>();
-        for (int index = 0; index < ScanConstants.bitmapTransporterList.size(); index++) {
-            Image im = new Image();
-            im.setImageQR(ScanConstants.bitmapTransporterList.get(index).QrValue);
-            if (ScanConstants.bitmapTransporterList.get(index).QrValue.equals("IMZA")) {
-                im.setImageBase64(ScanConstants.bitmapTransporterList.get(index).B64Imza);
-            } else {
-                Uri ir = ScanConstants.bitmapTransporterList.get(index).BitmapPath;
-                final File sd = Environment.getExternalStorageDirectory();
-                File src = new File(sd, ir.getPath());
-                Bitmap bitmap = BitmapFactory.decodeFile(src.getAbsolutePath());
-                im.setImageBase64(getEncoded64ImageStringFromBitmap(bitmap));
-                //im.setImageBase64("asd");
-            }
-            qrList.add(im);
-        }
-        Log.e("LOG QR ADED: ", String.valueOf(qrList.size()));
-        requestModel.setImages(qrList);
-
-        requestModel.setFormDetail(ScanConstants.Selected_Form);
-        requestModel.setCNo(ScanConstants.CNo);
         Gson gson = new Gson();
-        String json = gson.toJson(requestModel);
+        String json = gson.toJson(ScanConstants.ActiveReqModel);
         URL url = new URL(Constants.BASE_URL + "Form/SendForm");
 
 
@@ -201,7 +175,7 @@ public class MultiPageActivity extends AppCompatActivity {
         final Request request = new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", "OkHttp Bot")
-                .addHeader("Authorization", "Bearer " + Prefs.getString("Token",""))
+                .addHeader("Authorization", "Bearer " + Prefs.getString("Token", ""))
                 .post(body)
                 .build();
 
@@ -244,15 +218,70 @@ public class MultiPageActivity extends AppCompatActivity {
             }
         };
 
-        asyncTask.execute();*/
+        asyncTask.execute();
     }
 
-    public void scanMore(View view) {
-        Intent intent = new Intent(this, ScanActivity.class);
-        intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA);
 
-        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
-        startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE, options.toBundle());
+    public void scanMore(View view) {
+
+
+        int ActivePageCount = ScanConstants.ActivePages.size();
+        int SelectedPageCount = Integer.parseInt(ScanConstants.Selected_Form.getPageCount()) ;
+
+        if (ActivePageCount == SelectedPageCount) {
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            try {
+                                ScanConstants.ActiveReqModel.setFormDetail(ScanConstants.Selected_Form);
+                                ScanConstants.ActiveReqModel.setCampaingId(ScanConstants.Selected_Campaing.getId());
+                                ScanConstants.ActiveReqModel.setProductId(ScanConstants.Selected_Product.getId());
+                                ScanConstants.ActiveReqModel.setCNo(ScanConstants.CNo);
+                                ScanConstants.ActiveForm.setPages(ScanConstants.ActivePages);
+                                ScanConstants.ActivePages = new ArrayList<>();
+                                ScanConstants.Forms.add(ScanConstants.ActiveForm);
+                                ScanConstants.ActiveForm = new Form();
+                                ScanConstants.ActiveReqModel.setForms(ScanConstants.Forms);
+                                ScanConstants.IsFinish=true;
+                                requestUploadSurvey();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            ScanConstants.ActiveReqModel.setFormDetail(ScanConstants.Selected_Form);
+                            ScanConstants.ActiveReqModel.setCampaingId(ScanConstants.Selected_Campaing.getId());
+                            ScanConstants.ActiveReqModel.setProductId(ScanConstants.Selected_Product.getId());
+                            ScanConstants.ActiveReqModel.setCNo(ScanConstants.CNo);
+                            ScanConstants.ActiveForm.setPages(ScanConstants.ActivePages);
+                            ScanConstants.ActivePages = new ArrayList<>();
+                            ScanConstants.Forms.add(ScanConstants.ActiveForm);
+                            ScanConstants.ActiveForm = new Form();
+                            ScanConstants.IsFinish=false;
+                            Intent out = new Intent();
+                            out.putExtra(ScanConstants.SAVE_PDF, Boolean.TRUE);
+                            setResult(RESULT_OK, out);
+                            finish();
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Seçili form için sayfalar tamamlandı.").setPositiveButton("Gönder", dialogClickListener)
+                    .setNegativeButton("Yeni Form Seç", dialogClickListener).show();
+        } else {
+
+            Intent intent = new Intent(this, ScanActivity.class);
+            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA);
+
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+            startActivityForResult(intent, ScanConstants.START_CAMERA_REQUEST_CODE, options.toBundle());
+        }
     }
 
     protected synchronized void showProgressDialog(String message) {
@@ -297,11 +326,11 @@ public class MultiPageActivity extends AppCompatActivity {
             final String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
             stagingFiles = FileIOUtils.getAllFiles(stagingDirPath);
 
-            if (ScanConstants.Skip){
-                File fLast = stagingFiles.get(stagingFiles.size()-1);
+            if (ScanConstants.Skip) {
+                File fLast = stagingFiles.get(stagingFiles.size() - 1);
                 fLast.delete();
-                stagingFiles.remove(stagingFiles.size()-1);
-                ScanConstants.Skip=false;
+                stagingFiles.remove(stagingFiles.size() - 1);
+                ScanConstants.Skip = false;
             }
             /*for (File _file: stagingFiles) {
 

@@ -35,6 +35,7 @@ import com.scanlibrary.models.Campaign;
 import com.scanlibrary.models.Form;
 import com.scanlibrary.models.FormDetail;
 import com.scanlibrary.models.Image;
+import com.scanlibrary.models.Page;
 import com.scanlibrary.models.Product;
 import com.scanlibrary.models.SendFormRequestModel;
 import com.teesteknoloji.contractanalysis.MainApplication;
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(MaterialSpinner view, int position, long id, Product item) {
                 CampaingList = new ArrayList<>();
-                ScanConstants.Selected_Product= item;
+                ScanConstants.Selected_Product = item;
                 CampaingList = item.getCampaign();
                 campaingAdapter = new ArrayAdapter<Campaign>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, CampaingList);
                 MaterialSpinnerAdapter<Campaign> campaignMaterialSpinnerAdapter = new MaterialSpinnerAdapter<Campaign>(MainActivity.this, CampaingList);
@@ -239,7 +240,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (TbContractNumber.getText().length() > 0) {
             scannedBitmaps.clear();
-            ScanConstants.bitmapTransporterList = new ArrayList<BitmapTransporter>();
+            // ScanConstants.bitmapTransporterList = new ArrayList<BitmapTransporter>();
+            ScanConstants.ActiveForm = new Form();
+            ScanConstants.ActivePages = new ArrayList<>();
+
             String stagingDirPath = getApplicationContext().getString(R.string.base_staging_path);
             String scanningTmpDirectory = getApplicationContext().getString(R.string.base_scantmp_path);
 
@@ -256,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
             KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.ERROR_TYPE);
             pDialog.getProgressHelper().setBarColor(R.color.appRed);
             pDialog.setTitleText("Uyarı");
-            pDialog.setContentText("Sözleşme Numarası.");
+            pDialog.setContentText("Sözleşme numarası boş olamaz.");
             pDialog.setConfirmText("Tamam");
             pDialog.setCancelable(false);
             pDialog.show();
@@ -367,15 +371,31 @@ public class MainActivity extends AppCompatActivity {
 
             boolean saveMode = data.getExtras().containsKey(ScanConstants.SAVE_PDF) ? data.getExtras().getBoolean(ScanConstants.SAVE_PDF) : Boolean.FALSE;
             if (saveMode) {
-                List<BitmapTransporter> ll = ScanConstants.bitmapTransporterList;
-                Log.e("SAVE MODE: ", String.valueOf(saveMode));
-                KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
-                pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
-                pDialog.setTitleText("Sonuç");
-                pDialog.setContentText("Başarı ile kaydedildi.");
-                pDialog.setConfirmText("Tamam");
-                pDialog.setCancelable(false);
-                pDialog.show();
+                //List<BitmapTransporter> ll = ScanConstants.bitmapTransporterList;
+                if (ScanConstants.IsFinish) {
+                    Log.e("SAVE MODE: ", String.valueOf(saveMode));
+                    KAlertDialog pDialog = new KAlertDialog(MainActivity.this, KAlertDialog.SUCCESS_TYPE);
+                    pDialog.getProgressHelper().setBarColor(com.scanlibrary.R.color.appRed);
+                    pDialog.setTitleText("Sonuç");
+                    pDialog.setContentText("Başarı ile kaydedildi.");
+                    pDialog.setConfirmText("Tamam");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+
+
+                    ScanConstants.Selected_Form = new FormDetail();
+                    ScanConstants.Skip = false;
+                    ScanConstants.CNo = "";
+                    ScanConstants.Selected_Product = new Product();
+                    ScanConstants.Selected_Campaing = new Campaign();
+                    ScanConstants.Forms = new ArrayList<>();
+                    ScanConstants.ActiveForm = new Form();
+                    ScanConstants.ActivePages = new ArrayList<>();
+                    ScanConstants.ActiveReqModel = new SendFormRequestModel();
+                    ScanConstants.IsFinish = false;
+                } else {
+                    InitComponents();
+                }
             } else {
                 Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
                 boolean doScanMore = data.getExtras().getBoolean(ScanConstants.SCAN_MORE);

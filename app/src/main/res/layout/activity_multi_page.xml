@@ -31,16 +31,17 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="@dimen/margin_bottom_button"
-            android:fontFamily="@font/font_regular"
-            android:textFontWeight="600"
-            android:textAllCaps="false"
             android:background="@drawable/capsule_bg"
             android:drawableStart="@drawable/ic_outline_save_24px"
+            android:fontFamily="@font/font_regular"
             android:onClick="saveNow"
             android:orientation="horizontal"
             android:padding="@dimen/bottom_bar_padding"
             android:text="Kaydet"
-            android:textColor="@android:color/white"></Button>
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textFontWeight="600"
+            android:visibility="gone"></Button>
 
 
     </RelativeLayout>

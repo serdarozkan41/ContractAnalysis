@@ -8,7 +8,9 @@ import android.os.Environment;
 import com.scanlibrary.models.Campaign;
 import com.scanlibrary.models.Form;
 import com.scanlibrary.models.FormDetail;
+import com.scanlibrary.models.Page;
 import com.scanlibrary.models.Product;
+import com.scanlibrary.models.SendFormRequestModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,7 @@ public class ScanConstants {
     public final static String SCANNED_QR = "scannedQR";
     public final static String SCANNED_List = "scannedList";
     public final static String IMAGE_PATH = Environment.getExternalStorageDirectory().getPath() + "/ContractAnalysis/tmp";
-    public static List<BitmapTransporter> bitmapTransporterList = new ArrayList<>();
+    //public static List<BitmapTransporter> bitmapTransporterList = new ArrayList<>();
     public final static String SELECTED_BITMAP = "selectedBitmap";
     public final static String SCAN_MORE = "scanMore";
     public final static String SAVE_PDF = "savePdf";
@@ -37,6 +39,11 @@ public class ScanConstants {
     public static String CNo="";
     public static Product Selected_Product;
     public static Campaign Selected_Campaing;
+    public static List<Form> Forms = new ArrayList<>();
+    public static Form ActiveForm = new Form();
+    public static List<Page> ActivePages = new ArrayList<>();
+    public static SendFormRequestModel ActiveReqModel = new SendFormRequestModel();
+    public static boolean IsFinish;
     //public final static
 }
 

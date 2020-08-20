@@ -42,12 +42,14 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
 import com.scanlibrary.models.Form;
+import com.scanlibrary.models.Page;
 
 import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.MultipartBody;
@@ -67,6 +69,17 @@ public class ResultFragment extends Fragment {
     private TextView pageNumber;
     private TextView LbQR;
     private static ProgressDialogFragment progressDialogFragment;
+    private String LeftQR = "";
+    private String RightQR = "11111111111";
+    private String FormQR = "";
+    /*SAĞ ÜST İÇİN
+    *         Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
+        Canvas canvas = new Canvas(cutBitmap);
+        Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+        Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
+        canvas.drawBitmap(bitmap, srcRect, desRect, null);
+    * */
+
 
     public ResultFragment() {
     }
@@ -74,99 +87,151 @@ public class ResultFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.result_layout, null);
-        init();
+        showProgressDialog(getResources().getString(R.string.loading));
 
+        Bitmap takedPicture = InitComponents();
+        Bitmap cropedPicture = CropRightTopPicture(takedPicture);
+        DetectQR(cropedPicture);
+
+        dismissDialog();
         return view;
     }
 
-    private void init() {
-        showProgressDialog(getResources().getString(R.string.loading));
+    private Bitmap InitComponents() {
+        //Son resmi getir ve griye çevir
         Bitmap bitmap = getBitmap();
         bitmap = ConvertGray(bitmap);
-        final Bitmap ORJ_bitmap = bitmap;
+        //Ekrandaki imageViewleri tanımlama ve resmi ekranda göster
         scannedImageView = view.findViewById(R.id.scannedImage);
         IvSign = view.findViewById(R.id.IvSign);
         setScannedImage(bitmap);
+        //Ekrandaki butonları ekle ve ayarla
         doneButton = (Button) view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new DoneButtonClickListener());
         addButton = (Button) view.findViewById(R.id.addBtn);
         addButton.setOnClickListener(new AddButtonClickListener());
         pageNumber = (TextView) view.findViewById(R.id.pageNumber);
         LbQR = (TextView) view.findViewById(R.id.LbQr);
-
+        //Dosya sayısı ile sayfa sayısını hesapla
         final File sd = Environment.getExternalStorageDirectory();
         final String stagingDirPath = view.getContext().getString(R.string.base_staging_path);
         final File stagingDir = new File(sd, stagingDirPath);
         if (stagingDir.listFiles() != null && stagingDir.listFiles().length > 0) {
             pageNumber.setText(String.valueOf(stagingDir.listFiles().length + 1));
-
         } else {
             pageNumber.setText("1");
         }
-
+        //Bir takım hesaplar
         addButton.setText("Tara");
         SkipMood = false;
         ScanConstants.Skip = false;
-        Bitmap cutBitmap = ConvertGray(Bitmap.createBitmap(bitmap.getWidth() / 2, bitmap.getHeight() / 2, Bitmap.Config.ARGB_8888));
+        return bitmap;
+    }
+
+    private Bitmap CropRightTopPicture(Bitmap takedPicture) {
+        Bitmap cutBitmap = Bitmap.createBitmap(takedPicture.getWidth() / 2, takedPicture.getHeight() / 2, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(cutBitmap);
-        Rect desRect = new Rect(0, 0, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
-        Rect srcRect = new Rect(bitmap.getWidth() / 2, 0, bitmap.getWidth(), bitmap.getHeight() / 2);
-        canvas.drawBitmap(bitmap, srcRect, desRect, null);
+        Rect desRect = new Rect(0, 0, takedPicture.getWidth() / 2, takedPicture.getHeight() / 2);
+        Rect srcRect = new Rect(0, 0, takedPicture.getWidth(), takedPicture.getHeight() / 2);
+        canvas.drawBitmap(takedPicture, srcRect, desRect, null);
+        return cutBitmap;
+    }
 
+    private void DetectQR(Bitmap cropedPicture) {
         try {
-//            Log.e("BARCODE ARIYORUM: ", selectedForm.getHasBarcode());
-
-            InputImage image = InputImage.fromBitmap(cutBitmap, 1);
-
+            InputImage image = InputImage.fromBitmap(cropedPicture, 1);
             BarcodeScanner scanner = BarcodeScanning.getClient();
-
-            Task<List<Barcode>> result = scanner.process(image)
-                    .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                        @Override
-                        public void onSuccess(List<Barcode> barcodes) {
-                            if (barcodes.size() == 0) {
-                                Warning();
-                            } else {
-                                Log.e("SONUC Google: ", barcodes.get(0).getDisplayValue());
-                                foundedQR = barcodes.get(0).getDisplayValue();
-                                String pageType = foundedQR.substring(0, 1);
-                                LbQR.setText(foundedQR);
-                                if (pageType.equals("2")) {
-                                    for (Barcode qr : barcodes) {
-                                        Log.e("KOD: " + qr.getDisplayValue() + ", KONUM: ", String.valueOf(qr.getBoundingBox()));
-                                    }
-
-                                    if(foundedQR.length()>4){
-                                        String pNo = foundedQR.substring(8, 10);
-                                        Log.e("SAYFA Sayısı:", pNo);
-                                        if (pNo.equals("08")) {
-                                            CutSign(ORJ_bitmap);
-                                        }
-                                    }
-                                    else {
-                                        Warning();
-                                    }
+            Task<List<Barcode>> result = scanner.process(image).addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                @Override
+                public void onSuccess(List<Barcode> barcodes) {
+                    if (barcodes.size() == 0) {
+                        RightQR = "11111111111";
+                        LeftQR = "NOT_FOUND";
+                    } else {
+                        for (Barcode barcode : barcodes) {
+                            if (barcode.getDisplayValue().length() == 11) {
+                                RightQR = barcode.getDisplayValue();
+                                String isSign = RightQR.substring(0, 1);
+                                LbQR.setText(RightQR);
+                                if (isSign.equals("2")) {
+                                    //Bu Sayfada İmza Aramam Lazım
                                 }
+                                continue;
+                            }
 
+                            if (barcode.getDisplayValue().length() == 14) {
+                                LeftQR = barcode.getDisplayValue();
+                                FormQR = LeftQR;
+                                continue;
                             }
                         }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e("SONUC Google: ", e.getMessage());
-                            Warning();
-                        }
-                    });
-
-            dismissDialog();
-
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Warning();
+                }
+            });
         } catch (Exception ex) {
-            dismissDialog();
             Warning();
         }
+    }
 
-        dismissDialog();
+    private void GoMultiPage() {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent data = new Intent();
+                    Bitmap bitmap = transformed;
+                    if (bitmap == null) {
+                        bitmap = original;
+                    }
+                    Uri uri = Utils.getUri(getActivity(), bitmap);
+
+                    data.putExtra(ScanConstants.SCANNED_QR, LeftQR);
+
+                    data.putExtra(ScanConstants.SCANNED_RESULT, uri);
+
+                    if (ScanConstants.Skip == false) {
+
+                        if (FormQR.length() == 14) {
+                            ScanConstants.ActiveForm.setFormBarcode(FormQR);
+                            ScanConstants.ActiveForm.setFormNo(FormQR);
+                        }
+
+                        ScanConstants.ActiveForm.setIsControl(true);
+                        ScanConstants.ActiveForm.setFormId(Long.valueOf(ScanConstants.Selected_Form.getId()));
+                        Page page = new Page();
+                        page.setBarcode(RightQR);
+                        page.setImageBase64(getEncoded64ImageStringFromBitmap(ConvertGray(bitmap)));
+                        ScanConstants.ActivePages.add(page);
+
+                        /*BitmapTransporter bitmapTransporter = new BitmapTransporter();
+                        bitmapTransporter.BitmapPath = uri;
+                        bitmapTransporter.QrValue = RightQR;
+
+                        ScanConstants.bitmapTransporterList.add(bitmapTransporter);*/
+                    }
+
+                    data.putExtra(ScanConstants.SCAN_MORE, true);
+                    getActivity().setResult(Activity.RESULT_OK, data);
+
+                    original.recycle();
+                    System.gc();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            dismissDialog();
+                            getActivity().finish();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void CutSign(Bitmap bitmap) {
@@ -193,7 +258,7 @@ public class ResultFragment extends Fragment {
         bt.QrValue = "IMZA";
         bt.B64Imza = getEncoded64ImageStringFromBitmap(newBitmap);
         IvSign.setImageBitmap(newBitmap);
-        ScanConstants.bitmapTransporterList.add(bt);
+        //ScanConstants.bitmapTransporterList.add(bt);
     }
 
     boolean SkipMood = false;
@@ -243,13 +308,11 @@ public class ResultFragment extends Fragment {
         return bmpGrayscale;
     }
 
-
     private Bitmap getBitmap() {
 
         Uri uri = getUri();
         try {
             original = Utils.getBitmap(getActivity(), uri);
-
             final File sd = Environment.getExternalStorageDirectory();
             File fdelete = new File(sd, uri.getPath());
             boolean isDeleted = fdelete.delete();
@@ -314,58 +377,11 @@ public class ResultFragment extends Fragment {
         public void onClick(View v) {
             showProgressDialog(getResources().getString(R.string.loading));
             GoMultiPage();
-
         }
-    }
-
-    String foundedQR = "";
-
-    private void GoMultiPage() {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Intent data = new Intent();
-                    Bitmap bitmap = transformed;
-                    if (bitmap == null) {
-                        bitmap = original;
-                    }
-                    Uri uri = Utils.getUri(getActivity(), bitmap);
-
-                    data.putExtra(ScanConstants.SCANNED_QR, foundedQR);
-
-                    data.putExtra(ScanConstants.SCANNED_RESULT, uri);
-
-                    if (ScanConstants.Skip == false) {
-                        BitmapTransporter bitmapTransporter = new BitmapTransporter();
-                        bitmapTransporter.BitmapPath = uri;
-                        bitmapTransporter.QrValue = foundedQR;
-
-                        ScanConstants.bitmapTransporterList.add(bitmapTransporter);
-                    }
-
-                    data.putExtra(ScanConstants.SCAN_MORE, true);
-                    getActivity().setResult(Activity.RESULT_OK, data);
-
-                    original.recycle();
-                    System.gc();
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            dismissDialog();
-                            getActivity().finish();
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     protected synchronized void showProgressDialog(String message) {
         if (progressDialogFragment != null && progressDialogFragment.isVisible()) {
-            // Before creating another loading dialog, close all opened loading dialogs (if any)
             progressDialogFragment.dismissAllowingStateLoss();
         }
         progressDialogFragment = null;
